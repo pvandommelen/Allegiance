@@ -3801,22 +3801,31 @@ public:
 			const Rect& rectScreen = GetScreenRectValue()->GetValue();
 			if (m_pscreen->GetPane()) //kg- review
 			{
-				const WinPoint& sizePane = m_pscreen->GetPane()->GetSize();
+				const Point& sizePane = m_pscreen->GetImage()->GetBounds().GetRect().Max();
 
-				float scale;
-				scale = std::min(rectScreen.XSize() / sizePane.X(), rectScreen.YSize() / sizePane.Y());
+                if (sizePane.X() > 0 && sizePane.Y() > 0)
+                {
+                    float scale;
+                    scale = std::min(
+                        rectScreen.XSize() / sizePane.X(),
+                        rectScreen.YSize() / sizePane.Y()
+                    );
 
-				Point pointTranslate;
-				pointTranslate = Point(
-					0.5 * (rectScreen.XSize() - sizePane.X() * scale),
-					0.5 * (rectScreen.YSize() - sizePane.Y() * scale)
-				);
+                    Point pointTranslate;
+                    pointTranslate = Point(
+                        0.5 * (rectScreen.XSize() - sizePane.X() * scale),
+                        0.5 * (rectScreen.YSize() - sizePane.Y() * scale)
+                    );
 
-				Matrix2 matrix = Matrix2::GetIdentity();
-				matrix.SetScale(Point(scale, scale));
-				matrix.Translate(pointTranslate);
+                    Matrix2 matrix = Matrix2::GetIdentity();
+                    matrix.SetScale(Point(scale, scale));
+                    matrix.Translate(pointTranslate);
 
-				m_pMatrixTransformScreen->SetValue(matrix);
+                    if (m_pMatrixTransformScreen)
+                    {
+                        m_pMatrixTransformScreen->SetValue(matrix);
+                    }
+                }
 			}
 		}
 	}

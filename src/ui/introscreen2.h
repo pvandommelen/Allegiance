@@ -6,6 +6,6 @@ public:
     IntroScreen2();
     ~IntroScreen2();
 
-    Image* CreateImage();
+    TRef<Image> CreateImage();
 };
 

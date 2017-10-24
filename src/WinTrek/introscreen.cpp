@@ -22,6 +22,7 @@ class IntroScreen :
 private:
     TRef<Modeler>       m_pmodeler;
     TRef<Pane>          m_ppane;
+    TRef<Image>         m_pimage;
 
 	TRef<ButtonPane>	m_pbuttonDiscord;
     TRef<ButtonPane>    m_pbuttonPlayLan;
@@ -554,11 +555,16 @@ private:
 
 public:
 
+    Image* GetImage()
+    {
+        return m_pimage;
+    }
+
     IntroScreen(Modeler* pmodeler) :
         m_pmodeler(pmodeler)
     {
         IntroScreen2* test = new IntroScreen2();
-        test->CreateImage();
+        m_pimage = test->CreateImage();
 
         trekClient.DisconnectClub();
 

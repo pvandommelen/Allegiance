@@ -292,7 +292,7 @@ public:
         int count = m_vertices.GetCount();
         for(int index = 0; index < count; index++) {
             Vector vec = mat.Transform(m_vertices[index].GetPosition());
-            radius = max(radius, vec.Length());
+            radius = std::max(radius, vec.Length());
         }
 
         return radius;
@@ -1368,7 +1368,7 @@ public:
         float radius = 0;
         Geo* pgeo = Geo::Cast(GetValueList()->GetFirst());
         while (pgeo) {
-            radius = max(radius, pgeo->GetRadius(mat));
+            radius = std::max(radius, pgeo->GetRadius(mat));
             pgeo = Geo::Cast(GetValueList()->GetNext());
         }
 
@@ -1631,7 +1631,7 @@ public:
 
         int count = GetChildCount();
         for (int index = 0; index < count; index++) {
-            radius = max(radius, Geo::Cast(GetChild(index))->GetRadius(mat));
+            radius = std::max(radius, Geo::Cast(GetChild(index))->GetRadius(mat));
         }
 
         return radius;

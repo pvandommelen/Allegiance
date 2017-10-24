@@ -1,3 +1,6 @@
+
+#define NOMINMAX //why does it not use the project settings here?
+
 #include <windows.h>
 #include <windowsx.h>
 #include <mmsystem.h>

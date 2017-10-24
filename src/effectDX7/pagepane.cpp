@@ -795,7 +795,7 @@ public:
 
             InternalSetOffset(ppane, WinPoint(x, y));
             x         += xsizePane;
-            ysizeLine  = max(ysizeLine, ppane->YSize());
+            ysizeLine  = std::max(ysizeLine, ppane->YSize());
         }
 
         //

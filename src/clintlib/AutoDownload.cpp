@@ -473,7 +473,7 @@ public:
         //
         if ((m_cFiles + 1) >= m_cListAllocSize)
         {
-            m_cListAllocSize = max(32, m_cListAllocSize*2);
+            m_cListAllocSize = std::max((unsigned long)32, m_cListAllocSize*2);
 
             m_pszFileList = (char**)realloc(m_pszFileList, m_cListAllocSize * sizeof(char*));
 
@@ -796,7 +796,7 @@ public:
 
               float fCurrentBytesPerMillisecond = float(cbCurrentReading - m_cbLastReading) / ftimeElapsed;
 
-              float fWeight = 0.05f;//0.0025f;//max(min(0.50f, ftimeElapsed / 100000.0f), 0.0025f);
+              float fWeight = 0.05f;//0.0025f;//std::max(std::min(0.50f, ftimeElapsed / 100000.0f), 0.0025f);
 
               if (ftimeElapsed > 5000.0f)
                 fWeight = 0.25f;

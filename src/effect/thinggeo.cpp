@@ -1287,9 +1287,9 @@ public:
             // The culling radius is equal to the largest extent of the ellipse
             //
 
-            m_radiusCull = max(m_radiusCull, pvectorEllipse->X());
-            m_radiusCull = max(m_radiusCull, pvectorEllipse->Y());
-            m_radiusCull = max(m_radiusCull, pvectorEllipse->Z());
+            m_radiusCull = std::max(m_radiusCull, pvectorEllipse->X());
+            m_radiusCull = std::max(m_radiusCull, pvectorEllipse->Y());
+            m_radiusCull = std::max(m_radiusCull, pvectorEllipse->Z());
         } else {
             orient.Set(vecLocal);
         }

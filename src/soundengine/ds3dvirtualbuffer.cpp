@@ -131,7 +131,7 @@ void BufferPositionTracker::AddTime(DWORD dwElapsedTime)
 // playing buffer.
 void BufferPositionTracker::SetPosition(DWORD dwPosition)
 {
-    m_dwPosition = min(dwPosition, m_dwLength);
+    m_dwPosition = std::min(dwPosition, m_dwLength);
 };
 
 
@@ -382,7 +382,7 @@ HRESULT DSVirtualSoundBuffer::Update(DWORD dwTimeElapsed,
     // important.
     m_fDynamicPriority = m_fGain + m_fPriority
         + (m_bBufferPlaying ? 0.1f : 0)
-        + max(0.0f, 1.0f * (2 - m_fAge));
+        + std::max(0.0f, 1.0f * (2 - m_fAge));
 
     return S_OK;
 };
@@ -482,7 +482,7 @@ HRESULT DSVirtualSoundBuffer::SetGain(float fGain)
         return E_INVALIDARG;
     }
 
-    m_fGain = max(fGain, -100.0f);
+    m_fGain = std::max(fGain, -100.0f);
 
     return S_OK;
 };
@@ -492,8 +492,8 @@ HRESULT DSVirtualSoundBuffer::SetGain(float fGain)
 // and 2.0 is twice normal speed.  
 HRESULT DSVirtualSoundBuffer::SetPitch(float fPitch)
 {
-    fPitch = max(fPitch, DSBFREQUENCY_MIN / m_pdata->GetSampleRate());
-    fPitch = min(fPitch, DSBFREQUENCY_MAX / m_pdata->GetSampleRate());
+    fPitch = std::max(fPitch, float(DSBFREQUENCY_MIN) / m_pdata->GetSampleRate());
+    fPitch = std::min(fPitch, float(DSBFREQUENCY_MAX) / m_pdata->GetSampleRate());
 
     m_fPitch = fPitch;
 
@@ -756,7 +756,7 @@ HRESULT DS3DVirtualSoundBuffer::Update(DWORD dwTimeElapsed,
             else
             {
                 // calculate how much softer the sound is (in dB) based on distance
-                float fDistanceGain = min(0.0f, (float)(
+                float fDistanceGain = std::min(0.0f, (float)(
                     fRolloffFactor * -10 * log(fDistanceSquared/fMinimumDistanceSquared)
                     ));
 

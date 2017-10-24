@@ -557,7 +557,9 @@ public:
     IntroScreen(Modeler* pmodeler) :
         m_pmodeler(pmodeler)
     {
-        
+        IntroScreen2* test = new IntroScreen2();
+        test->CreateImage();
+
         trekClient.DisconnectClub();
 
         TRef<INameSpace> pnsIntroScreen = m_pmodeler->CreateNameSpace("introscreendata", m_pmodeler->GetNameSpace("gamepanes"));

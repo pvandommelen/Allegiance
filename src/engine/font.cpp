@@ -377,8 +377,8 @@ private:
 
 			m_data[index].m_size   = WinPoint(size.cx, size.cy);
 
-			m_height = max(m_height, size.cy);
-			m_width	 = max(m_width,	 size.cx);
+			m_height = std::max(m_height, (int)size.cy);
+			m_width	 = std::max(m_width, (int)size.cx);
 		}
 
 		// release the hdc

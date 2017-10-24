@@ -216,7 +216,7 @@ public:
 				currOffset.SetX( psurface->GetOffset().X() + x);
 				currOffset.SetY( psurface->GetOffset().Y() );
 				currSize.SetX( size.X() );
-				currSize.SetY( min( size.Y(), YSize() ) );
+				currSize.SetY( std::min( size.Y(), YSize() ) );
 				
 				// Create vertices and render.
 				GenerateScreenVertices( hTexture, &currOffset, &currSize );
@@ -233,7 +233,7 @@ public:
 			currOffset.SetX( psurface->GetOffset().X() + x);
 			currOffset.SetY( psurface->GetOffset().Y() );
 			currSize.SetX( XSize() - x );
-			currSize.SetY( min( size.Y(), YSize() ) );
+			currSize.SetY( std::min( size.Y(), YSize() ) );
 			
 			// Create vertices and render.
 			GenerateScreenVertices( hTexture, &currOffset, &currSize );
@@ -254,7 +254,7 @@ public:
 				// Generate offset and size.
 				currOffset.SetX( psurface->GetOffset().X() );
 				currOffset.SetY( psurface->GetOffset().Y() + y );
-				currSize.SetX( min( size.X(), XSize() ) );
+				currSize.SetX( std::min( size.X(), XSize() ) );
 				currSize.SetY( size.Y() );
 				
 				// Create vertices and render.
@@ -272,7 +272,7 @@ public:
 			// Generate offset and size.
 			currOffset.SetX( psurface->GetOffset().X() );
 			currOffset.SetY( psurface->GetOffset().Y() + y );
-			currSize.SetX( min( size.X(), XSize() ) );
+			currSize.SetX( std::min( size.X(), XSize() ) );
 			currSize.SetY( YSize() - y );
 			
 			// Create vertices and render.
@@ -296,7 +296,7 @@ public:
                 psurface->BitBlt(
                     WinPoint(x, 0),
                     m_psurface,
-                    WinRect(0, 0, size.X(), min(size.Y(), YSize()))
+                    WinRect(0, 0, size.X(), std::min(size.Y(), YSize()))
                 );
                 x += size.X();
             }
@@ -304,7 +304,7 @@ public:
             psurface->BitBlt(
                 WinPoint(x, 0),
                 m_psurface,
-                WinRect(0, 0, XSize() - x, min(size.Y(), YSize()))
+                WinRect(0, 0, XSize() - x, std::min(size.Y(), YSize()))
             );
         }
         else
@@ -316,7 +316,7 @@ public:
                 psurface->BitBlt(
                     WinPoint(0, y),
                     m_psurface,
-                    WinRect(0, 0, min(size.X(), XSize()), size.Y())
+                    WinRect(0, 0, std::min(size.X(), XSize()), size.Y())
                 );
                 y += size.Y();
             }
@@ -324,7 +324,7 @@ public:
             psurface->BitBlt(
                 WinPoint(0, y),
                 m_psurface,
-                WinRect(0, 0, min(size.X(), XSize()), YSize() - y)
+                WinRect(0, 0, std::min(size.X(), XSize()), YSize() - y)
             );
         }
     }

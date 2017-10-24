@@ -409,7 +409,7 @@ HRESULT DS3DSoundEngine::Update()
         // get the m_nNumBuffersDesired most important sounds by popping 
         // them off of the queue
         listNewSounds.reserve(m_nNumBuffersDesired);
-        for (int nSound = 0; nSound < min(m_nNumBuffersDesired, listAllSounds.size()); nSound++)
+        for (int nSound = 0; nSound < std::min(m_nNumBuffersDesired, (int)listAllSounds.size()); nSound++)
         {
             std::pop_heap(listAllSounds.begin(), listAllSounds.end() - nSound, 
                 std::not2(SoundPriorityCompare()));
@@ -518,8 +518,8 @@ HRESULT DS3DSoundEngine::SetQuality(Quality quality)
         if ((hr != DSERR_PRIOLEVELNEEDED) && ZFailed(hr)) return hr;
         if (m_bAllowHardware)
         {
-            m_nNumBuffersDesired = max(16, (int)m_dscaps.dwMaxHwMixingStreamingBuffers * 2 / 3);
-            m_nNumBuffersMax = max(24, (int)m_dscaps.dwMaxHwMixingStreamingBuffers);
+            m_nNumBuffersDesired = std::max(16, (int)m_dscaps.dwMaxHwMixingStreamingBuffers * 2 / 3);
+            m_nNumBuffersMax = std::max(24, (int)m_dscaps.dwMaxHwMixingStreamingBuffers);
         }
         else
         {
@@ -533,8 +533,8 @@ HRESULT DS3DSoundEngine::SetQuality(Quality quality)
         if ((hr != DSERR_PRIOLEVELNEEDED) && ZFailed(hr)) return hr;
         if (m_bAllowHardware)
         {
-            m_nNumBuffersDesired = max(24, (int)m_dscaps.dwMaxHwMixingStreamingBuffers - 8);
-            m_nNumBuffersMax = max(32, (int)m_dscaps.dwMaxHwMixingStreamingBuffers);
+            m_nNumBuffersDesired = std::max(24, (int)m_dscaps.dwMaxHwMixingStreamingBuffers - 8);
+            m_nNumBuffersMax = std::max(32, (int)m_dscaps.dwMaxHwMixingStreamingBuffers);
         }
         else
         {

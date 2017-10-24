@@ -66,6 +66,7 @@
 #include "trekinput.h"
 #include "resource.h"
 #include "Zone.h"
+#include "ui.h"
 #ifdef USEAUTH
 #include "zauth.h"
 #endif

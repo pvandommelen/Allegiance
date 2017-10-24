@@ -29,6 +29,7 @@
 //
 
 #include <list>
+#include <algorithm>
 
 //
 // Windows headers

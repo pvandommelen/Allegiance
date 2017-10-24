@@ -13,6 +13,8 @@
 #include <Windows.h>
 #include <wincrypt.h>
 
+#include <algorithm>
+
 #include "zlib.h"
 
 #include "steam_gameserver.h"

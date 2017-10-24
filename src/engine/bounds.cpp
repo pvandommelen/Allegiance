@@ -36,10 +36,10 @@ Bounds2 Bounds2::Transform(const Matrix2& mat) const
     return
         Bounds2(
             Rect(
-                min(vec1.X(), vec2.X()),
-                min(vec1.Y(), vec2.Y()),
-                max(vec1.X(), vec2.X()),
-                max(vec1.Y(), vec2.Y())
+                std::min(vec1.X(), vec2.X()),
+                std::min(vec1.Y(), vec2.Y()),
+                std::max(vec1.X(), vec2.X()),
+                std::max(vec1.Y(), vec2.Y())
             )
         );
 }
@@ -49,10 +49,10 @@ Bounds2 Union(const Bounds2& bounds1, const Bounds2& bounds2)
     return
         Bounds2(
             Rect(
-                min(bounds1.GetRect().XMin(), bounds2.GetRect().XMin()),
-                min(bounds1.GetRect().YMin(), bounds2.GetRect().YMin()),
-                max(bounds1.GetRect().XMax(), bounds2.GetRect().XMax()),
-                max(bounds1.GetRect().YMax(), bounds2.GetRect().YMax())
+                std::min(bounds1.GetRect().XMin(), bounds2.GetRect().XMin()),
+                std::min(bounds1.GetRect().YMin(), bounds2.GetRect().YMin()),
+                std::max(bounds1.GetRect().XMax(), bounds2.GetRect().XMax()),
+                std::max(bounds1.GetRect().YMax(), bounds2.GetRect().YMax())
             )
         );
 }
@@ -62,10 +62,10 @@ Bounds2 Intersect(const Bounds2& bounds1, const Bounds2& bounds2)
     return
         Bounds2(
             Rect(
-                max(bounds1.GetRect().XMin(), bounds2.GetRect().XMin()),
-                max(bounds1.GetRect().YMin(), bounds2.GetRect().YMin()),
-                min(bounds1.GetRect().XMax(), bounds2.GetRect().XMax()),
-                min(bounds1.GetRect().YMax(), bounds2.GetRect().YMax())
+                std::max(bounds1.GetRect().XMin(), bounds2.GetRect().XMin()),
+                std::max(bounds1.GetRect().YMin(), bounds2.GetRect().YMin()),
+                std::min(bounds1.GetRect().XMax(), bounds2.GetRect().XMax()),
+                std::min(bounds1.GetRect().YMax(), bounds2.GetRect().YMax())
             )
         );
 }
@@ -143,14 +143,14 @@ Bounds Union(const Bounds& bounds1, const Bounds& bounds2)
     return
         Bounds(
             Vector(
-                min(bounds1.GetMin().X(), bounds2.GetMin().X()),
-                min(bounds1.GetMin().Y(), bounds2.GetMin().Y()),
-                min(bounds1.GetMin().Z(), bounds2.GetMin().Z())
+                std::min(bounds1.GetMin().X(), bounds2.GetMin().X()),
+                std::min(bounds1.GetMin().Y(), bounds2.GetMin().Y()),
+                std::min(bounds1.GetMin().Z(), bounds2.GetMin().Z())
             ),
             Vector(
-                max(bounds1.GetMax().X(), bounds2.GetMax().X()),
-                max(bounds1.GetMax().Y(), bounds2.GetMax().Y()),
-                max(bounds1.GetMax().Z(), bounds2.GetMax().Z())
+                std::max(bounds1.GetMax().X(), bounds2.GetMax().X()),
+                std::max(bounds1.GetMax().Y(), bounds2.GetMax().Y()),
+                std::max(bounds1.GetMax().Z(), bounds2.GetMax().Z())
             )
         );
 }

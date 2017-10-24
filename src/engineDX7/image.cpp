@@ -353,7 +353,7 @@ public:
             ZString strLine = BreakLine(str, m_width - indent);
             WinPoint size   = m_pfont->GetTextExtent(strLine);
 
-            xsize  = max(xsize, size.X());
+            xsize  = std::max(xsize, size.X());
             ysize += size.Y();
             indent = m_indent;
         }

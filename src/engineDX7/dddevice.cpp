@@ -831,7 +831,7 @@ public:
         // Figure out how many levels we need
         //
 
-        int minSize = min(size.X(), size.Y());
+        int minSize = std::min(size.X(), size.Y());
         int maps    = 0;
 
         while (minSize > 1) {

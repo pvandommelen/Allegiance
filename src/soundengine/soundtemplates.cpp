@@ -1183,14 +1183,14 @@ public:
                 for (pcAdd = pcSample2Start; pcAdd < pcSample3Start; ++pcAdd)
                 {
                     // add them with saturation
-                    *pcAdd = (unsigned char)(max(0, min(0xFF, 
+                    *pcAdd = (unsigned char)(std::max(0, std::min(0xFF, 
                         (int)pcAdd[m_dwRepeatLength] + (int)pcAdd[m_dwRepeatLength*2] - 0x7F
                         )));
                 }
                 for (; pcAdd < pcSample1End; ++pcAdd)
                 {
                     // add them with saturation
-                    *pcAdd = (unsigned char)(max(0, min(0xFF, 
+                    *pcAdd = (unsigned char)(std::max(0, std::min(0xFF, 
                         (int)pcAdd[0] + (int)pcAdd[m_dwRepeatLength] 
                         + (int)pcAdd[m_dwRepeatLength*2] - 0x7F*2
                         )));
@@ -1198,7 +1198,7 @@ public:
                 for (; pcAdd < pcSample2End; ++pcAdd)
                 {
                     // add them with saturation
-                    *pcAdd = (unsigned char)(max(0, min(0xFF, 
+                    *pcAdd = (unsigned char)(std::max(0, std::min(0xFF, 
                         (int)pcAdd[0] + (int)pcAdd[m_dwRepeatLength] - 0x7F
                         )));
                 }
@@ -1223,14 +1223,14 @@ public:
                 for (pwAdd = pwSample2Start; pwAdd < pwSample2Start; ++pwAdd)
                 {
                     // add them with saturation
-                    *pwAdd = (short)(max(-0x8000, min(0x7FFF, 
+                    *pwAdd = (short)(std::max(-0x8000, std::min(0x7FFF, 
                         (int)pwAdd[m_dwRepeatLength/2] + (int)pwAdd[m_dwRepeatLength]
                         )));
                 }
                 for (; pwAdd < pwSample1End; ++pwAdd)
                 {
                     // add them with saturation
-                    *pwAdd = (short)(max(-0x8000, min(0x7FFF, 
+                    *pwAdd = (short)(std::max(-0x8000, std::min(0x7FFF, 
                         (int)pwAdd[0] + (int)pwAdd[m_dwRepeatLength/2]
                          + (int)pwAdd[m_dwRepeatLength]
                         )));
@@ -1238,7 +1238,7 @@ public:
                 for (; pwAdd < pwSample2End; ++pwAdd)
                 {
                     // add them with saturation
-                    *pwAdd = (short)(max(-0x8000, min(0x7FFF, 
+                    *pwAdd = (short)(std::max(-0x8000, std::min(0x7FFF, 
                         (int)pwAdd[0] + (int)pwAdd[m_dwRepeatLength/2]
                         )));
                 }

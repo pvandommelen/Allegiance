@@ -80,7 +80,7 @@ public:
 
     COLORREF MakeCOLORREF() const 
     { 
-        return RGB(min(m_r * 255, 255), min(m_g * 255, 255), min(m_b * 255, 255)); 
+        return RGB(std::min((BYTE)m_r * 255, 255), std::min((BYTE)m_g * 255, 255), std::min((BYTE)m_b * 255, 255));
     }
 
     Color AdjustAlpha(float scale)

@@ -31,8 +31,8 @@ const float c_dtFlashOff = 0.25f;
 const float c_dtFlashingDuration = 2.0f;
 
 const int c_nCountdownMax = 1000000; // just a big number
-const int c_nMinGain = -60;
-const int c_nMinFFGain = 0; //Imago
+const float c_nMinGain = -60;
+const float c_nMinFFGain = 0; //Imago
 
 // -Imago: manual AFK toggle flags for auto-AFK
 extern bool g_bActivity = true;
@@ -3804,7 +3804,7 @@ public:
 				const WinPoint& sizePane = m_pscreen->GetPane()->GetSize();
 
 				float scale;
-				scale = min(rectScreen.XSize() / sizePane.X(), rectScreen.YSize() / sizePane.Y());
+				scale = std::min(rectScreen.XSize() / sizePane.X(), rectScreen.YSize() / sizePane.Y());
 
 				Point pointTranslate;
 				pointTranslate = Point(
@@ -4908,7 +4908,7 @@ public:
 	// #294 - Turkey 8/13
 	void IncreaseChatLines()
 	{
-		DWORD lines = (DWORD)m_pnumberChatLinesDesired->GetValue() + 1;
+		int lines = (int)m_pnumberChatLinesDesired->GetValue() + 1;
 
 		if (SetChatLines(lines))
 		{
@@ -4919,8 +4919,8 @@ public:
 			{
 				if (GetViewMode() == vmLoadout)
 				{
-					m_pchatListPane->SetChatLines(min(lines, 6));
-					m_pnumberChatLines->SetValue(min(lines, 6));
+					m_pchatListPane->SetChatLines(std::min(lines, 6));
+					m_pnumberChatLines->SetValue(std::min(lines, 6));
 				}
 				else if (GetViewMode() <= vmOverride)
 				{
@@ -4935,7 +4935,7 @@ public:
 
 	void ReduceChatLines()
 	{
-		DWORD lines = (DWORD)m_pnumberChatLinesDesired->GetValue() - 1;
+		int lines = (int)m_pnumberChatLinesDesired->GetValue() - 1;
 
 		if (SetChatLines(lines))
 		{
@@ -4946,8 +4946,8 @@ public:
 			{
 				if (GetViewMode() == vmLoadout)
 				{
-					m_pchatListPane->SetChatLines(min(lines, 6));
-					m_pnumberChatLines->SetValue(min(lines, 6));
+					m_pchatListPane->SetChatLines(std::min(lines, 6));
+					m_pnumberChatLines->SetValue(std::min(lines, 6));
 				}
 				else if (GetViewMode() <= vmOverride)
 				{
@@ -5648,7 +5648,7 @@ public:
 
     void AdjustMusicVolume(float fDelta)
     {
-        float fNewValue = min(0, max(c_nMinGain, m_pnumMusicGain->GetValue() + fDelta));
+        float fNewValue = std::min(0.0f, std::max(c_nMinGain, m_pnumMusicGain->GetValue() + fDelta));
         m_pnumMusicGain->SetValue(fNewValue);
 
         SavePreference("MusicGain", (DWORD)-fNewValue);
@@ -5668,7 +5668,7 @@ public:
 
     void AdjustSFXVolume(float fDelta)
     {
-        float fNewValue = min(0, max(c_nMinGain, m_pnumSFXGain->GetValue() + fDelta));
+        float fNewValue = std::min(0.0f, std::max(c_nMinGain, m_pnumSFXGain->GetValue() + fDelta));
         m_pnumSFXGain->SetValue(fNewValue);
 
         SavePreference("SFXGain", (DWORD)-fNewValue);
@@ -5687,7 +5687,7 @@ public:
 
     void AdjustVoiceOverVolume(float fDelta)
     {
-        float fNewValue = min(0, max(c_nMinGain, m_pnumVoiceOverGain->GetValue() + fDelta));
+        float fNewValue = std::min(0.0f, std::max(c_nMinGain, m_pnumVoiceOverGain->GetValue() + fDelta));
         m_pnumVoiceOverGain->SetValue(fNewValue);
 
         SavePreference("VoiceOverGain", (DWORD)-fNewValue);
@@ -5708,7 +5708,7 @@ public:
     void AdjustFFGain(float fDelta)
     {
 #if (DIRECT3D_VERSION >= 0x0800)
-        float fNewValue = min(10000, max(c_nMinFFGain, m_pnumFFGain->GetValue() + fDelta));
+        float fNewValue = std::min(10000.0f, std::max(c_nMinFFGain, m_pnumFFGain->GetValue() + fDelta));
         m_pnumFFGain->SetValue(fNewValue);
 
         SavePreference("FFGain", fNewValue);
@@ -5731,7 +5731,7 @@ public:
 
     void AdjustMouseSens(float fDelta)
     {
-        float fNewValue = min(2, max(0.1f, m_pnumMouseSens->GetValue() + fDelta));
+        float fNewValue = std::min(2.0f, std::max(0.1f, m_pnumMouseSens->GetValue() + fDelta));
         m_pnumMouseSens->SetValue(fNewValue);
 
         SavePreference("MouseSensitivity", ZString(fNewValue));
@@ -5817,7 +5817,7 @@ public:
         }
         else
         {
-			float value = (min(2, max(0.1f, fCurrentSens + fDelta))) * 100;
+			float value = (std::min(2.0f, std::max(0.1f, fCurrentSens + fDelta))) * 100;
 			char szValue[4] = {'\0'};
 			sprintf(szValue,"%.0f",value);
             strResult += "to " + ZString(szValue) + " %";
@@ -6123,7 +6123,7 @@ public:
         }
         else
         {
-            strResult += "to " + ZString(min(0, max(c_nMinGain, fCurrentGain + fDelta))) + " dB";
+            strResult += "to " + ZString(std::min(0.0f, std::max(c_nMinGain, fCurrentGain + fDelta))) + " dB";
         }
 
         return strResult;
@@ -6143,7 +6143,7 @@ public:
         }
         else
         {
-            strResult += "to " + ZString(min(10000, max(c_nMinFFGain, fCurrentGain + fDelta) / 100)) + " %";
+            strResult += "to " + ZString(std::min(10000.0f, std::max(c_nMinFFGain, fCurrentGain + fDelta) / 100)) + " %";
         }
 
         return strResult;
@@ -6947,8 +6947,8 @@ public:
 
 				if (vm == vmLoadout)
 				{
-					m_pchatListPane->SetChatLines(min(lines, 6));
-					m_pnumberChatLines->SetValue(min(lines, 6));
+					m_pchatListPane->SetChatLines(std::min(lines, 6));
+					m_pnumberChatLines->SetValue(std::min(lines, 6));
 				}
 				else if (vm <= vmOverride)
 				{
@@ -9456,9 +9456,9 @@ public:
         void Evaluate()
         {
             if (m_bOn) {
-                m_value = min(1, m_valueStart + (GetTime() - m_timeStart));
+                m_value = std::min(1.0f, m_valueStart + (GetTime() - m_timeStart));
             } else {
-                m_value = max(0, m_valueStart - (GetTime() - m_timeStart));
+                m_value = std::max(0.0f, m_valueStart - (GetTime() - m_timeStart));
             }
 
             GetValueInternal() = Interpolate(m_positionOff, m_positionOn, m_value);
@@ -11423,9 +11423,9 @@ public:
             int nTimeLeft;
 
             if (trekClient.MyMission()->GetStage() == STAGE_STARTING)
-                nTimeLeft = max(0, int(trekClient.MyMission()->GetMissionParams().timeStart - Time::Now()) + 1);
+                nTimeLeft = std::max(0, int(trekClient.MyMission()->GetMissionParams().timeStart - Time::Now()) + 1);
             else
-                nTimeLeft = max(0, int(
+                nTimeLeft = std::max(0, int(
                     trekClient.MyMission()->GetMissionParams().GetCountDownTime()
                         - (Time::Now() - trekClient.MyMission()->GetMissionParams().timeStart) + 1));
 

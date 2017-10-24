@@ -87,18 +87,18 @@ public:
 
     void Intersect(const TRect& rect)
     {
-        SetXMin(max(XMin(), rect.XMin()));
-        SetXMax(min(XMax(), rect.XMax()));
-        SetYMin(max(YMin(), rect.YMin()));
-        SetYMax(min(YMax(), rect.YMax()));
+        SetXMin(std::max(XMin(), rect.XMin()));
+        SetXMax(std::min(XMax(), rect.XMax()));
+        SetYMin(std::max(YMin(), rect.YMin()));
+        SetYMax(std::min(YMax(), rect.YMax()));
     }
 
     void Accumulate(const TRect& rect)
     {
-        SetXMin(min(XMin(), rect.XMin()));
-        SetXMax(max(XMax(), rect.XMax()));
-        SetYMin(min(YMin(), rect.YMin()));
-        SetYMax(max(YMax(), rect.YMax()));
+        SetXMin(std::min(XMin(), rect.XMin()));
+        SetXMax(std::max(XMax(), rect.XMax()));
+        SetYMin(std::min(YMin(), rect.YMin()));
+        SetYMax(std::max(YMax(), rect.YMax()));
     }
 
     void Offset(const VSNET_TNFIX RectType::PointType& pt)

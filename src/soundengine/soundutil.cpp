@@ -1009,7 +1009,7 @@ HRESULT StubbedTweakableSoundInstance::SetGain(float fGain)
         return E_INVALIDARG;
     }
 
-    m_fGain = max(fGain, -100.0f);
+    m_fGain = std::max(fGain, -100.0f);
     m_bGainSet = true;
 
     return S_OK;

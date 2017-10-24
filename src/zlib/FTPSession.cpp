@@ -423,7 +423,7 @@ protected:
             return DOWNLOAD_ERROR;
         }
 
-//        cBytesAvail = min(cBytesAvail, nMaxBlockSize);
+//        cBytesAvail = std::min(cBytesAvail, nMaxBlockSize);
 
         if (cBytesAvail == 0)
         {
@@ -434,7 +434,7 @@ protected:
         //
         // Get the available data
         //
-        unsigned long cBytesAttempted = min(cBytesAvail, m_nBufferSize-m_cBytesRead);
+        unsigned long cBytesAttempted = std::min(cBytesAvail, (unsigned long)m_nBufferSize-m_cBytesRead);
 
         if (!InternetReadFile((void*)m_hFileConnection, (void*)(m_buffer+m_cBytesRead), cBytesAttempted, &cBytesJustRead))
         {

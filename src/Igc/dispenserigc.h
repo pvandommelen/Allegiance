@@ -168,7 +168,7 @@ class CdispenserIGC : public IdispenserIGC
             }
             else
             {
-                return 1.0f - max(0.0f, (m_timeLoaded - Time::Now()) / m_expendableType->GetLoadTime());
+                return 1.0f - std::max(0.0f, (m_timeLoaded - Time::Now()) / m_expendableType->GetLoadTime());
             }
         }
 

@@ -480,7 +480,7 @@ public:
             }
 
             if (count * sizeof(Type) > 2 + sizeof(Type)) {
-                return min(count, RLELengthMask);
+                return std::min(count, RLELengthMask);
             }
         }
 

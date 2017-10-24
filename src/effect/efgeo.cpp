@@ -893,7 +893,7 @@ public:
         //
 
         float lengthImage =
-            max(
+            std::max(
                 pcontext->GetImageRadius(vecStart, size),
                 pcontext->GetImageRadius(vecEnd, size)
             );
@@ -913,7 +913,7 @@ public:
         // color is based on size
         //
 
-        float bright = min(1.0f, lengthImage / 128);
+        float bright = std::min(1.0f, lengthImage / 128);
         Color color(bright, bright, bright);
 
         //
@@ -1002,7 +1002,7 @@ public:
             }
 
             //float screenRadius = pcontext->GetScreenRadius(Vector::GetZero(), m_radius);
-            //pcontext->SetLOD(screenRadius * max(m_lodBiasMin, s_lodBias));
+            //pcontext->SetLOD(screenRadius * std::max(m_lodBiasMin, s_lodBias));
 
             GetGeo()->Render(pcontext);
 

@@ -189,7 +189,7 @@ template<int nBits> class TLargeBitMask
 		// CHECK THIS, IT MIGHT OVERFLOW ! -KGJV
         void ToString(char* pszBytes, int cch) const
         {
-          int cb = min(cch / 2, sizeof(m_bits));
+          int cb = std::min(cch / 2, (int)sizeof(m_bits));
           for (int i = 0; i < cb; ++i)
           {
             char szByte[3];
@@ -205,7 +205,7 @@ template<int nBits> class TLargeBitMask
             return false;
           BYTE bits[sizeof(m_bits)];
           ZeroMemory(bits, sizeof(bits));
-          int cb = min(cch / 2, sizeof(m_bits));
+          int cb = std::min(cch / 2, (int)sizeof(m_bits));
           for (int i = 0; i < cb; ++i)
           {
             char szByte[3];

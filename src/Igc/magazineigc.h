@@ -160,7 +160,7 @@ class CmagazineIGC : public ImagazineIGC
             }
             else
             {
-                return 1.0f - max(0.0f, (m_timeLoaded - Time::Now()) / m_missileType->GetLoadTime());
+                return 1.0f - std::max(0.0f, (m_timeLoaded - Time::Now()) / m_missileType->GetLoadTime());
             }
         }
 

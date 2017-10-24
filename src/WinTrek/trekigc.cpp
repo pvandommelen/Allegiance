@@ -769,7 +769,7 @@ private:
         // realistic as this may be, it does not reflect the player's 
         // expectations.  Thus, use the throttle instead. 
         const ControlData&  controls = m_pship->GetControls();
-        return max(controls.jsValues[c_axisThrottle] * 0.5f + 0.5f, 
+        return std::max(controls.jsValues[c_axisThrottle] * 0.5f + 0.5f, 
             (m_pship->GetStateM() & afterburnerButtonIGC) ? 1.0f : 0.0f);
     }
 
@@ -779,7 +779,7 @@ private:
         const IhullTypeIGC* pht = m_pship->GetHullType();
         float fThrust = m_pship->GetHullType()->GetThrust() 
             / m_pship->GetHullType()->GetSideMultiplier();
-        float fForwardThrust = max(0, -1 * m_pship->GetEngineVector() 
+        float fForwardThrust = std::max(0.0f, -1 * m_pship->GetEngineVector() 
             * m_pship->GetOrientation().GetBackward());
         Vector vectSideThrust = m_pship->GetEngineVector() + 
             fForwardThrust * m_pship->GetOrientation().GetBackward();
@@ -1111,7 +1111,7 @@ private:
     void UpdateEngineSoundLevels(DWORD dwElapsedTime)
     {
         float fNewThrustSoundLevel = ForwardThrustFraction();
-        float fNewTurnSoundLevel = min(1.0f, max(TurnRate() * 20, SidewaysThrustFraction()));
+        float fNewTurnSoundLevel = std::min(1.0f, std::max(TurnRate() * 20, SidewaysThrustFraction()));
 
         // if we were playing this sound a moment ago...
         if (wasSilent != m_stateLast)
@@ -1121,15 +1121,15 @@ private:
 
             // clip the new sound level according to the max rate of change 
             // allowed.
-            fNewThrustSoundLevel = max(
+            fNewThrustSoundLevel = std::max(
                 m_fThrustSoundLevel - cfMaxThrustRateOfChange * dwElapsedTime,
-                min(
+                std::min(
                     m_fThrustSoundLevel + cfMaxThrustRateOfChange * dwElapsedTime,
                     fNewThrustSoundLevel
                 ));
-            fNewTurnSoundLevel = max(
+            fNewTurnSoundLevel = std::max(
                 m_fTurnSoundLevel - cfMaxTurnRateOfChange * dwElapsedTime,
-                min(
+                std::min(
                     m_fTurnSoundLevel + cfMaxTurnRateOfChange * dwElapsedTime,
                     fNewTurnSoundLevel
                 ));
@@ -4021,7 +4021,7 @@ void WinTrekClient::DamageShipEvent(Time now,
                 if (pcredit->GetSide() && pcredit->GetSide() != GetSide())
                 {
                     // damaged by an enemy - adjust the groove level
-                    m_nGrooveLevel = max(m_nGrooveLevel, 2);
+                    m_nGrooveLevel = std::max(m_nGrooveLevel, 2);
                     m_vtimeGrooveDrops[2] = Time::Now() + c_fGrooveLevelDuration;
                 }
             }
@@ -5220,7 +5220,7 @@ int WinTrekClient::GetGrooveLevel()
                     bFiring = true;
 
                 IprojectileTypeIGC* ppt = pweapon->GetProjectileType();
-                fMaximumRange = max(fMaximumRange, ppt->GetSpeed() * pweapon->GetLifespan());
+                fMaximumRange = std::max(fMaximumRange, ppt->GetSpeed() * pweapon->GetLifespan());
             }
         }
 
@@ -5234,7 +5234,7 @@ int WinTrekClient::GetGrooveLevel()
                 bFiring = true;
 
             ImissileTypeIGC* pmt = pmagazine->GetMissileType();
-            fMaximumRange = max(fMaximumRange, 
+            fMaximumRange = std::max(fMaximumRange, 
                 pmt->GetLifespan()*(pmt->GetInitialSpeed()+0.5f*pmt->GetLifespan()*pmt->GetAcceleration()));
         }
     }
@@ -5279,7 +5279,7 @@ int WinTrekClient::GetGrooveLevel()
     // if we see enemies or enemies see us, be afraid
     if (bEnemiesSighted || MyPlayerInfo()->GetShipStatus().GetDetected())
     {
-        m_nGrooveLevel = max(m_nGrooveLevel, 1);
+        m_nGrooveLevel = std::max(m_nGrooveLevel, 1);
         m_vtimeGrooveDrops[1] = Time::Now() + c_fGrooveLevelDuration;
     }
 
@@ -5297,7 +5297,7 @@ int WinTrekClient::GetGrooveLevel()
         case c_cwMinerThreatened:
         case c_cwBuilderThreatened:
         case c_cwStationThreatened:
-            m_nGrooveLevel = max(m_nGrooveLevel, 1);
+            m_nGrooveLevel = std::max(m_nGrooveLevel, 1);
             m_vtimeGrooveDrops[1] = Time::Now() + c_fGrooveLevelDuration;
             break;
         }
@@ -5313,7 +5313,7 @@ int WinTrekClient::GetGrooveLevel()
     if (bEnemiesInRange && bFiring 
         || bEnemiesInRangeShootingAtMe)
     {
-        m_nGrooveLevel = max(m_nGrooveLevel, 2);
+        m_nGrooveLevel = std::max(m_nGrooveLevel, 2);
         m_vtimeGrooveDrops[2] = Time::Now() + c_fGrooveLevelDuration;
     }
 

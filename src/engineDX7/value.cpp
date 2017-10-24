@@ -776,7 +776,7 @@ public:
 
     void Evaluate()
     {
-        GetValueInternal() = min(Get0()->GetValue(), Get1()->GetValue());
+        GetValueInternal() = std::min(Get0()->GetValue(), Get1()->GetValue());
     }
 };
 
@@ -792,7 +792,7 @@ public:
 
     void Evaluate()
     {
-        GetValueInternal() = max(Get0()->GetValue(), Get1()->GetValue());
+        GetValueInternal() = std::max(Get0()->GetValue(), Get1()->GetValue());
     }
 };
 

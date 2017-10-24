@@ -148,7 +148,7 @@ public:
     void SetScrollPos(int pos)
     {
         m_posScroll = 
-            max(min(pos, m_plist->GetCount() * GetSignificantSize(*m_ppainter) - GetSignificantSize()), 0);
+            std::max(std::min(pos, m_plist->GetCount() * GetSignificantSize(*m_ppainter) - GetSignificantSize()), 0);
 
         if (m_pscroll) {
             m_pscroll->SetPos(m_posScroll);
@@ -398,8 +398,8 @@ public:
     {
         InternalSetSize(
             WinPoint(
-                max(m_ppainter->GetXSize(), m_sizeMin.X()),
-                max(       GetExpand().Y(), m_sizeMin.Y())
+                std::max(m_ppainter->GetXSize(), m_sizeMin.X()),
+                std::max(       GetExpand().Y(), m_sizeMin.Y())
             )
         );
 

@@ -707,8 +707,8 @@ bool EngineWindow::OnWindowPosChanging(WINDOWPOS* pwp)
 	{
 		// For some reason, when restoring a minimised window, it gets a position of
 		// -32000, -32000.
-		pwp->x = max( 0, pwp->x );
-		pwp->y = max( 0, pwp->y );
+		pwp->x = std::max( 0, pwp->x );
+		pwp->y = std::max( 0, pwp->y );
 
         if (!m_bMovingWindow) 
 		{

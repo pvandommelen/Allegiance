@@ -152,7 +152,7 @@ public:
         }
 
         const float fMinGain = -40;
-        float fClippedGain = max(fMinGain, fGain);
+        float fClippedGain = std::max(fMinGain, fGain);
 
         // set the volume on every CD player (since we can't map to the right one)
         // restore the volume settings for all of the CD players

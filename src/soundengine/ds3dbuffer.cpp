@@ -1089,7 +1089,7 @@ HRESULT DS3DStreamingSoundBuffer::StreamData(void *pvBuffer, DWORD dwLength)
     // for non-looping sounds, we reach the end of the source.
     do {
         // copy data up until the end of the sound.
-        DWORD dwCopyLength = min(dwLengthRemaining, dwSourceSize - m_dwSourceOffset);
+        DWORD dwCopyLength = std::min(dwLengthRemaining, dwSourceSize - m_dwSourceOffset);
 
         // copy the source
         if (dwCopyLength > 0)
@@ -1477,7 +1477,7 @@ HRESULT DS3DASRSoundBuffer::StreamData(void *pvBuffer, DWORD dwLength)
     if (m_dwSourceOffset < m_dwLoopOffset)
     {
         // copy data up until the end of the attack or end of the write block.
-        dwCopyLength = min(dwLengthRemaining, m_dwLoopOffset - m_dwSourceOffset);
+        dwCopyLength = std::min(dwLengthRemaining, m_dwLoopOffset - m_dwSourceOffset);
 
         // copy the source
         if (dwCopyLength > 0)
@@ -1509,7 +1509,7 @@ HRESULT DS3DASRSoundBuffer::StreamData(void *pvBuffer, DWORD dwLength)
             && (m_dwSourceOffset < m_dwLoopOffset + m_dwLoopLength))))
     {
         // copy data up until the end of a sustain loop or end of the write block.
-        dwCopyLength = min(dwLengthRemaining, 
+        dwCopyLength = std::min(dwLengthRemaining, 
             m_dwLoopOffset + m_dwLoopLength - m_dwSourceOffset);
 
         // copy the source
@@ -1553,7 +1553,7 @@ HRESULT DS3DASRSoundBuffer::StreamData(void *pvBuffer, DWORD dwLength)
             m_dwSourceOffset = m_dwLoopOffset + m_dwLoopLength;
         
         // copy data up until the end or end of the write block.
-        dwCopyLength = min(dwLengthRemaining, dwSourceSize - m_dwSourceOffset);
+        dwCopyLength = std::min(dwLengthRemaining, dwSourceSize - m_dwSourceOffset);
 
         // copy the source
         if (dwCopyLength > 0)

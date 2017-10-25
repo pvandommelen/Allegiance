@@ -4,7 +4,18 @@
 #include "ui.h"
 
 #include <stdexcept>
+#include <fstream>
 
+std::string UiEngine::m_stringLogPath = "";
+
+void WriteLog(const std::string &text)
+{
+    if (UiEngine::m_stringLogPath == "") {
+        return;
+    }
+    std::ofstream log_file(UiEngine::m_stringLogPath, std::ios_base::out | std::ios_base::app);
+    log_file << text << std::endl;
+}
 
 std::string UiEngine::m_stringArtPath;
 void UiEngine::SetGlobalArtPath(std::string path)
@@ -198,13 +209,21 @@ public:
 
 class UiEngineImpl : public UiEngine {
 
+private:
     TRef<Engine> m_pEngine;
+
+    TRef<EventSourceImpl> m_pReloadEventSource;
 
 
 public:
     UiEngineImpl(Engine* pEngine) : 
-        m_pEngine(pEngine)
+        m_pEngine(pEngine),
+        m_pReloadEventSource(new EventSourceImpl())
     {
+    }
+
+    void TriggerReload() {
+        m_pReloadEventSource->Trigger();
     }
 
     ~UiEngineImpl() {}
@@ -213,7 +232,7 @@ public:
     //
     //}
 
-    TRef<Image> LoadImageFromLua(std::string path) {
+    TRef<Image> InnerLoadImageFromLua(std::string path) {
         sol::state lua;
         LoaderImpl loader = LoaderImpl(lua, m_pEngine, {
             m_stringArtPath + "/PBUI",
@@ -222,19 +241,63 @@ public:
 
         Executor executor = Executor(loader);
 
+        WriteLog(path + ": " + "Loading");
         try {
             sol::function script = loader.LoadScript(path);
 
+            WriteLog(path + ": " + "Parsed");
+
             TRef<Image> image = executor.Execute<TRef<Image>>(script);
+
+            WriteLog(path + ": " + "Executed");
             return image;
         }
         catch (const std::runtime_error& e) {
+            WriteLog(path + ": ERROR " + e.what());
             return Image::GetEmpty();
         }
     }
+
+    class ImageReloadSink : public IEventSink, public WrapImage {
+
+        TRef<UiEngineImpl> m_pUiEngine;
+        std::string m_path;
+
+    public:
+        ImageReloadSink(UiEngineImpl* pUiEngine, std::string path) :
+            m_pUiEngine(pUiEngine),
+            m_path(path),
+            WrapImage(pUiEngine->InnerLoadImageFromLua(path))
+        {
+        }
+
+        ~ImageReloadSink() {
+            m_pUiEngine->m_pReloadEventSource->RemoveSink(this);
+        }
+
+        bool OnEvent(IEventSource* pevent) {
+            SetImage(m_pUiEngine->InnerLoadImageFromLua(m_path));
+            return true;
+        }
+
+    };
+
+    TRef<Image> LoadImageFromLua(std::string path) {
+        //TRef<Image> inner = InnerLoadImageFromLua(path);
+        //TRef<Image> wrapper = new WrapImage(inner);
+
+        ImageReloadSink* result = new ImageReloadSink(this, path);
+        m_pReloadEventSource->AddSink(result);
+        return result;
+    }
 };
 
+
+TRef<UiEngine> g_pUiEngine;
 UiEngine* UiEngine::Create(Engine* pEngine)
 {
-    return new UiEngineImpl(pEngine);
+    if (!g_pUiEngine) {
+        g_pUiEngine = new UiEngineImpl(pEngine);
+    }
+    return g_pUiEngine;
 }

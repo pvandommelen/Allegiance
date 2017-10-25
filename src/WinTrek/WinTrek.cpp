@@ -2763,6 +2763,7 @@ public:
 		GetModeler()->SetArtPath(strArtPath);
 
         UiEngine::SetGlobalArtPath((std::string)strArtPath);
+        UiEngine::m_stringLogPath = (std::string)"lua.log";
 
 		//Imago 6/29/09 7/28/09 now plays video in thread while load continues // BT - 9/17 - Refactored a bit.
 		HANDLE hDDVidThread = NULL;
@@ -9006,6 +9007,14 @@ public:
             m_ptrekInput->SetFocus(true);
             TrekKey tk = m_ptrekInput->HandleKeyMessage(ks);
 
+            if (ks.bDown && ks.bAlt) {
+                switch (ks.vk) {
+                case VK_F1:
+                    //ugly hack
+                    UiEngine::Create(GetEngine())->TriggerReload();
+                    return true;
+                }
+            }
             if (TK_NoKeyMapping != tk) {
                 if (ks.bDown) {
 

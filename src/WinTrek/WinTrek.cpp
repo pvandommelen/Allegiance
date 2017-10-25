@@ -3803,7 +3803,14 @@ public:
 			const Rect& rectScreen = GetScreenRectValue()->GetValue();
 			if (m_pscreen->GetPane()) //kg- review
 			{
-				const Point& sizePane = m_pscreen->GetImage()->GetBounds().GetRect().Max();
+                Point sizePane;
+                if (m_pscreen->GetImage()) {
+                    sizePane = m_pscreen->GetImage()->GetBounds().GetRect().Max();
+                }
+                else {
+                    WinPoint winpoint = m_pscreen->GetPane()->GetSize();
+                    sizePane = Point(winpoint.X(), winpoint.Y());
+                }
 
                 if (sizePane.X() > 0 && sizePane.Y() > 0)
                 {

@@ -12,29 +12,68 @@ void UiEngine::SetGlobalArtPath(std::string path)
     m_stringArtPath = path;
 }
 
+class PathFinder {
+
+private:
+    // from: https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
+    inline bool file_exists(const std::string& name) {
+        struct stat buffer;
+        return (stat(name.c_str(), &buffer) == 0);
+    }
+    std::vector<std::string> m_paths;
+
+public:
+
+    PathFinder(std::vector<std::string> paths) :
+        m_paths(paths)
+    {
+
+    }
+
+    std::string FindPath(std::string& subpath) {
+        for (auto& path : m_paths) {
+            if (file_exists(path + '/' + subpath) == true) {
+                return path + '/' + subpath;
+            }
+        }
+        return "";
+    }
+};
+
 class LoaderImpl {
 
 private:
-    std::vector<std::string> m_paths;
+    PathFinder m_pathfinder;
     sol::state* m_pLua;
 
 public:
 
     LoaderImpl(sol::state& lua, Engine* pEngine, std::vector<std::string> paths)
+        : m_pathfinder(paths)
     {
         m_pLua = &lua;
-        m_paths = paths;
+        PathFinder* pathfinder = &m_pathfinder;
 
         sol::table tableImage = m_pLua->create_table();
         tableImage["GetEmpty"] = []() {
             return Image::GetEmpty();
         };
-        tableImage["CreateExtent"] = [](RectValue* rect) {
-            return CreateExtentImage(rect, new ColorValue(Color(1, 0, 0)));
+        tableImage["CreateExtent"] = [](RectValue* rect, ColorValue* color) {
+            return CreateExtentImage(rect, color);
         };
-        tableImage["LoadFile"] = [pEngine](PathString path) {
+        tableImage["LoadFile"] = [pEngine, pathfinder](std::string path) {
+            //std::string subpath = (std::string)path;
+            std::string fullpath = pathfinder->FindPath(path);
 
-            TRef<ZFile> zf = new ZFile(path, OF_READ | OF_SHARE_DENY_WRITE);
+            if (fullpath == "") {
+                throw std::runtime_error("Path not found: " + path);
+            }
+
+            const char* charString = fullpath.c_str();
+
+            PathString pathString = PathString(ZString(charString));
+
+            TRef<ZFile> zf = new ZFile(pathString, OF_READ | OF_SHARE_DENY_WRITE);
             ZFile * pFile = (ZFile*)zf;
 
             D3DXIMAGE_INFO fileInfo;
@@ -63,14 +102,28 @@ public:
                         zf,
                         false,
                         Color(0, 0, 0),
-                        path);
+                        pathString);
 
-                return (Value*)new ConstantImage(psurface, path);
+                return (TRef<Image>)new ConstantImage(psurface, pathString);
             }
             else
             {
                 _ASSERT(false && "Failed to load image.");
             }
+        };
+        tableImage["Group"] = [](sol::table list) {
+            TRef<GroupImage> pgroup = new GroupImage();
+
+            int count = list.size();
+
+            TRef<Image> child;
+
+            for (int i = 1; i <= count; ++i) {
+                child = list.get<TRef<Image>>(i);
+                pgroup->AddImageToTop(child);
+            }
+
+            return (TRef<Image>)pgroup;
         };
         m_pLua->set("Image", tableImage);
 
@@ -79,6 +132,12 @@ public:
             return new RectValue(Rect(left, bottom, width, height));
         };
         m_pLua->set("Rect", tableRect);
+
+        sol::table tableColor = m_pLua->create_table();
+        tableColor["Create"] = [](float r, float g, float b, sol::optional<float> alpha) {
+            return new ColorValue(Color(r, g, b, alpha.value_or(1.0f)));
+        };
+        m_pLua->set("Color", tableColor);
     }
 
     ~LoaderImpl() {
@@ -86,7 +145,7 @@ public:
 
     sol::function LoadScript(std::string subpath) {
 
-        std::string path = FindPath(subpath);
+        std::string path = m_pathfinder.FindPath(subpath);
         if (path == "") {
             throw std::runtime_error("File not found: " + subpath);
         }
@@ -99,22 +158,6 @@ public:
         sol::function function = script;
 
         return function;
-    }
-
-private:
-    // from: https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
-    inline bool file_exists(const std::string& name) {
-        struct stat buffer;
-        return (stat(name.c_str(), &buffer) == 0);
-    }
-
-    std::string FindPath(std::string& subpath) {
-        for (auto& path : m_paths) {
-            if (file_exists(path + '/' + subpath) == true) {
-                return path + '/' + subpath;
-            }
-        }
-        return "";
     }
 };
 

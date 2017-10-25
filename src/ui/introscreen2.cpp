@@ -1,24 +1,22 @@
+
 #include "pch.h"
-
 #include "ui.h"
-#include "introscreen2.h"
 
 
-IntroScreen2::IntroScreen2()
+class IntroScreen2Impl : public IntroScreen2 {
+
+public:
+    IntroScreen2Impl() {}
+
+    ~IntroScreen2Impl() {}
+
+    TRef<Image> CreateImage()
+    {
+        return Image::GetEmpty();
+    }
+};
+
+IntroScreen2 * IntroScreen2::Create()
 {
-}
-
-
-IntroScreen2::~IntroScreen2()
-{
-}
-
-TRef<Image> IntroScreen2::CreateImage()
-{
-    sol::state lua;
-    int value = lua.script("return 54");
-    
-    //TRef<Image> img = );
-
-    return CreateExtentImage(new RectValue(Rect(0, 0, 1000, 1000)), new ColorValue(Color(1, 0, 0)));
+    return new IntroScreen2Impl();
 }

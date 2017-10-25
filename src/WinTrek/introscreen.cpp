@@ -563,8 +563,10 @@ public:
     IntroScreen(Modeler* pmodeler) :
         m_pmodeler(pmodeler)
     {
-        IntroScreen2* test = new IntroScreen2();
-        m_pimage = test->CreateImage();
+        UiEngine* pUiEngine = UiEngine::Create(m_pmodeler->GetEngine());
+        //IntroScreen2* test = IntroScreen2::Create();
+        m_pimage = pUiEngine->LoadImageFromLua("introscreen/introscreen.lua");
+        return;
 
         trekClient.DisconnectClub();
 

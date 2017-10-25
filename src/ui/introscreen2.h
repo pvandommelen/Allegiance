@@ -1,11 +1,15 @@
 #pragma once
 
+//class IntroScreen2Impl;
+
 class IntroScreen2
 {
-public:
-    IntroScreen2();
-    ~IntroScreen2();
 
-    TRef<Image> CreateImage();
+public:
+
+    static IntroScreen2* Create();
+
+    virtual TRef<Image> CreateImage() = 0;
 };
 
+//IntroScreen2* CreateIntroScreen2();

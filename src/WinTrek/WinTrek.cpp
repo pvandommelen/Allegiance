@@ -2762,6 +2762,8 @@ public:
 		// Now set the art path, performed after initialise, else Modeler isn't valid.
 		GetModeler()->SetArtPath(strArtPath);
 
+        UiEngine::SetGlobalArtPath((std::string)strArtPath);
+
 		//Imago 6/29/09 7/28/09 now plays video in thread while load continues // BT - 9/17 - Refactored a bit.
 		HANDLE hDDVidThread = NULL;
 

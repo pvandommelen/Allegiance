@@ -5,4 +5,5 @@
 
 #include "sol.hpp"
 
+#include "UiEngine.h"
 #include "introscreen2.h"

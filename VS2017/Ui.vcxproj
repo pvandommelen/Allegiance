@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\ui\introscreen2.h" />
+    <ClInclude Include="..\src\ui\items.hpp" />
     <ClInclude Include="..\src\ui\ui.h" />
     <ClInclude Include="..\src\ui\UiEngine.h" />
   </ItemGroup>

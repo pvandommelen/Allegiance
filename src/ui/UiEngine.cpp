@@ -1,5 +1,3 @@
-#define SOL_CHECK_ARGUMENTS 1
-
 #include "pch.h"
 #include "ui.h"
 #include "items.hpp";
@@ -13,6 +11,7 @@
 #include <fstream>
 
 std::string UiEngine::m_stringLogPath = "";
+
 
 void WriteLog(const std::string &text)
 {
@@ -41,6 +40,8 @@ public:
         : m_pathfinder(paths)
     {
         m_pLua = &lua;
+
+        //m_pLua->new_usertype<Image>("Image");// , sol::base_classes, sol::bases<TRef<Image>>());
 
         ImageNamespace::AddNamespace(m_pLua, pEngine, &m_pathfinder);
         EventNamespace::AddNamespace(m_pLua);
@@ -138,6 +139,7 @@ public:
 
     TRef<Image> InnerLoadImageFromLua(std::string path) {
         sol::state lua;
+
         LoaderImpl loader = LoaderImpl(lua, m_pEngine, {
             m_stringArtPath + "/PBUI",
             m_stringArtPath
@@ -151,7 +153,7 @@ public:
 
             WriteLog(path + ": " + "Parsed");
 
-            TRef<Image> image = executor.Execute<TRef<Image>>(script);
+            TRef<Image> image = executor.Execute<Image*>(script);
 
             WriteLog(path + ": " + "Executed");
             return image;

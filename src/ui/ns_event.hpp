@@ -43,15 +43,15 @@ public:
     static void AddNamespace(sol::state* m_pLua) {
         sol::table tableEvent = m_pLua->create_table();
 
-        tableEvent["Get"] = [](TRef<Image> image, std::string string) {
-            MouseEventImage* pMouseEventImage = (MouseEventImage*)((Image*)image);
+        tableEvent["Get"] = [](Image* image, std::string string) {
+            MouseEventImage* pMouseEventImage = (MouseEventImage*)(image);
             return pMouseEventImage->GetEventSource(string);
         };
 
         
 
         tableEvent["ToBoolean"] = [](IEventSource* pEnableSource, IEventSource* pDisableSource) {
-            return new EventToBoolean(pEnableSource, pDisableSource);
+            return (ModifiableBoolean*)new EventToBoolean(pEnableSource, pDisableSource);
         };
 
         m_pLua->set("Event", tableEvent);

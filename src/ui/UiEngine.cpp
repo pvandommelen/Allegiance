@@ -4,6 +4,11 @@
 #include "ui.h"
 #include "items.hpp";
 
+#include "ns_math.hpp";
+#include "ns_color.hpp";
+#include "ns_event.hpp";
+#include "ns_image.hpp";
+
 #include <stdexcept>
 #include <fstream>
 
@@ -24,34 +29,6 @@ void UiEngine::SetGlobalArtPath(std::string path)
     m_stringArtPath = path;
 }
 
-class PathFinder {
-
-private:
-    // from: https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
-    inline bool file_exists(const std::string& name) {
-        struct stat buffer;
-        return (stat(name.c_str(), &buffer) == 0);
-    }
-    std::vector<std::string> m_paths;
-
-public:
-
-    PathFinder(std::vector<std::string> paths) :
-        m_paths(paths)
-    {
-
-    }
-
-    std::string FindPath(std::string& subpath) {
-        for (auto& path : m_paths) {
-            if (file_exists(path + '/' + subpath) == true) {
-                return path + '/' + subpath;
-            }
-        }
-        return "";
-    }
-};
-
 class LoaderImpl {
 
 private:
@@ -64,138 +41,14 @@ public:
         : m_pathfinder(paths)
     {
         m_pLua = &lua;
-        PathFinder* pathfinder = &m_pathfinder;
 
-        sol::table tableImage = m_pLua->create_table();
-        tableImage["GetEmpty"] = []() {
-            return Image::GetEmpty();
-        };
-        tableImage["CreateExtent"] = [](RectValue* rect, ColorValue* color) {
-            return CreateExtentImage(rect, color);
-        };
-        tableImage["CreateMouseEvent"] = [](TRef<Image> image) {
-            return (TRef<Image>)new MouseEventImage(image);
-        };
-        tableImage["LoadFile"] = [pEngine, pathfinder](std::string path) {
-            //std::string subpath = (std::string)path;
-            std::string fullpath = pathfinder->FindPath(path);
+        ImageNamespace::AddNamespace(m_pLua, pEngine, &m_pathfinder);
+        EventNamespace::AddNamespace(m_pLua);
 
-            if (fullpath == "") {
-                throw std::runtime_error("Path not found: " + path);
-            }
+        MathNamespace::AddNamespace(m_pLua);
+        RectNamespace::AddNamespace(m_pLua);
 
-            const char* charString = fullpath.c_str();
-
-            PathString pathString = PathString(ZString(charString));
-
-            TRef<ZFile> zf = new ZFile(pathString, OF_READ | OF_SHARE_DENY_WRITE);
-            ZFile * pFile = (ZFile*)zf;
-
-            D3DXIMAGE_INFO fileInfo;
-            if (D3DXGetImageInfoFromFileInMemory(pFile->GetPointer(),
-                pFile->GetLength(),
-                &fileInfo) == D3D_OK)
-            {
-                _ASSERT(fileInfo.ResourceType == D3DRTYPE_TEXTURE);
-
-                // We can resize non-UI textures.
-                WinPoint targetSize(fileInfo.Width, fileInfo.Height);
-
-                DWORD dwMaxTextureSize = CD3DDevice9::Get()->GetMaxTextureSize();
-                _ASSERT(dwMaxTextureSize >= 256);
-                while ((targetSize.x > (LONG)dwMaxTextureSize) ||
-                    (targetSize.y > (LONG)dwMaxTextureSize))
-                {
-                    targetSize.x = targetSize.x >> 1;
-                    targetSize.y = targetSize.y >> 1;
-                }
-                // For D3D9, we only allow black colour keys.
-                TRef<Surface> psurface =
-                    pEngine->CreateSurfaceD3DX(
-                        &fileInfo,
-                        &targetSize,
-                        zf,
-                        false,
-                        Color(0, 0, 0),
-                        pathString);
-
-                return (TRef<Image>)new ConstantImage(psurface, pathString);
-            }
-            else
-            {
-                _ASSERT(false && "Failed to load image.");
-            }
-        };
-        tableImage["Group"] = [](sol::table list) {
-            TRef<GroupImage> pgroup = new GroupImage();
-
-            int count = list.size();
-
-            TRef<Image> child;
-
-            for (int i = 1; i <= count; ++i) {
-                child = list.get<TRef<Image>>(i);
-                pgroup->AddImageToTop(child);
-            }
-
-            return (TRef<Image>)pgroup;
-        };
-        m_pLua->set("Image", tableImage);
-
-        sol::table tableRect = m_pLua->create_table();
-        tableRect["Create"] = [](int left, int bottom, int width, int height) {
-            return new RectValue(Rect(left, bottom, width, height));
-        };
-        m_pLua->set("Rect", tableRect);
-
-        sol::table tableColor = m_pLua->create_table();
-        tableColor["Create"] = [](float r, float g, float b, sol::optional<float> alpha) {
-            return new ColorValue(Color(r, g, b, alpha.value_or(1.0f)));
-        };
-        m_pLua->set("Color", tableColor);
-
-        sol::table tableEvent = m_pLua->create_table();
-        tableEvent["Get"] = [](TRef<Image> image, std::string string) {
-            MouseEventImage* pMouseEventImage = (MouseEventImage*)((Image*)image);
-            return pMouseEventImage->GetEventSource(string);
-        };
-
-        class EventToBoolean : public ModifiableBoolean, IEventSink {
-            TRef<IEventSource> m_pEnableSource;
-            TRef<IEventSource> m_pDisableSource;
-
-        public:
-            EventToBoolean(IEventSource* pEnableSource, IEventSource* pDisableSource) : 
-                m_pEnableSource(pEnableSource),
-                m_pDisableSource(pDisableSource),
-                ModifiableBoolean(false)
-            {
-                pEnableSource->AddSink(this);
-                pDisableSource->AddSink(this);
-            }
-
-            ~EventToBoolean() {
-                m_pEnableSource->RemoveSink(this);
-                m_pDisableSource->RemoveSink(this);
-            }
-
-            bool OnEvent(IEventSource* source) {
-                if (source == m_pEnableSource) {
-                    SetValue(true);
-                } else if (source == m_pDisableSource) {
-                    SetValue(false);
-                }
-                else {
-                    ZAssert(false);
-                }
-                return true;
-            }
-        };
-
-        tableEvent["ToBoolean"] = [](IEventSource* pEnableSource, IEventSource* pDisableSource) {
-            return new EventToBoolean(pEnableSource, pDisableSource);
-        };
-        m_pLua->set("Event", tableEvent);
+        ColorNamespace::AddNamespace(m_pLua);        
 
         m_pLua->new_usertype<MouseEventImage>("MouseEventImage",
             sol::base_classes, sol::bases<Image>()

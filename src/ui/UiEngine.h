@@ -18,3 +18,7 @@ public:
     virtual void TriggerReload() = 0;
 };
 
+class Loader {
+public:
+    virtual sol::function LoadScript(std::string subpath) = 0;
+};

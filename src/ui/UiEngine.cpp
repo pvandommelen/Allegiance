@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "ui.h"
-#include "items.hpp";
+#include "items.hpp"
 
-#include "ns_math.hpp";
-#include "ns_color.hpp";
-#include "ns_event.hpp";
-#include "ns_image.hpp";
+#include "ns_math.hpp"
+#include "ns_color.hpp"
+#include "ns_event.hpp"
+#include "ns_image.hpp"
+#include "ns_file.hpp"
 
 #include <stdexcept>
 #include <fstream>
@@ -28,7 +29,7 @@ void UiEngine::SetGlobalArtPath(std::string path)
     m_stringArtPath = path;
 }
 
-class LoaderImpl {
+class LoaderImpl : public Loader {
 
 private:
     PathFinder m_pathfinder;
@@ -49,7 +50,9 @@ public:
         MathNamespace::AddNamespace(m_pLua);
         RectNamespace::AddNamespace(m_pLua);
 
-        ColorNamespace::AddNamespace(m_pLua);        
+        ColorNamespace::AddNamespace(m_pLua);
+
+        FileNamespace::AddNamespace(m_pLua, this);
 
         m_pLua->new_usertype<MouseEventImage>("MouseEventImage",
             sol::base_classes, sol::bases<Image>()

@@ -16,6 +16,7 @@
     <ClInclude Include="..\src\ui\ns_color.hpp" />
     <ClInclude Include="..\src\ui\ns_event.hpp" />
     <ClInclude Include="..\src\ui\ns_file.hpp" />
+    <ClInclude Include="..\src\ui\ns_font.hpp" />
     <ClInclude Include="..\src\ui\ns_image.hpp" />
     <ClInclude Include="..\src\ui\ns_math.hpp" />
     <ClInclude Include="..\src\ui\ui.h" />

@@ -103,3 +103,72 @@ public:
         return MouseResult();
     }
 };
+
+template<class TransformedType, class OriginalType>
+class TransformedValue : public TStaticValue<TransformedType> {
+
+    std::function<TransformedType(OriginalType)> m_callback;
+
+protected:
+    TransformedType GetEvaluatedValue(OriginalType value) {
+        return m_callback(value);
+    }
+
+public:
+    TransformedValue(std::function<TransformedType(OriginalType)> callback, TStaticValue<OriginalType>* value) :
+        m_callback(callback),
+        TStaticValue(value)
+    {}
+
+    void Evaluate()
+    {
+        OriginalType value = ((TStaticValue<OriginalType>*)GetChild(0))->GetValue();
+
+        TransformedType evaluated = GetEvaluatedValue(value);
+
+        GetValueInternal() = evaluated;
+    }
+};
+
+template<class TransformedType, class OriginalType, class OriginalType2>
+class TransformedValue2 : public TStaticValue<TransformedType> {
+    typedef std::function<TransformedType(OriginalType, OriginalType2)> CallbackType;
+    CallbackType m_callback;
+
+protected:
+    TransformedType GetEvaluatedValue(OriginalType value, OriginalType2 value2) {
+        return m_callback(value, value2);
+    }
+
+public:
+    TransformedValue2(CallbackType callback, TStaticValue<OriginalType>* value, TStaticValue<OriginalType2>* value2) :
+        m_callback(callback),
+        TStaticValue(value, value2)
+    {}
+
+    void Evaluate()
+    {
+        OriginalType value = ((TStaticValue<OriginalType>*)GetChild(0))->GetValue();
+        OriginalType2 value2 = ((TStaticValue<OriginalType2>*)GetChild(1))->GetValue();
+
+        TransformedType evaluated = GetEvaluatedValue(value, value2);
+
+        GetValueInternal() = evaluated;
+    }
+};
+
+template<typename A>
+TStaticValue<A>* wrapValue(sol::object a) {
+    TStaticValue<A>* converted_a;
+    if (a.is<A>()) {
+        converted_a = new TStaticValue<A>(a.as<A>());
+    }
+    else if (a.is<TStaticValue<A>*>()) {
+        converted_a = a.as<TStaticValue<A>*>();
+    }
+    else {
+        // force a cast, this sometimes still works, exception otherwise
+        converted_a = new TStaticValue<A>(a.as<A>());
+    }
+    return converted_a;
+};

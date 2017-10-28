@@ -57,7 +57,7 @@ public:
         ImageNamespace::AddNamespace(context);
         EventNamespace::AddNamespace(pLua);
 
-        MathNamespace::AddNamespace(pLua);
+        NumberNamespace::AddNamespace(pLua);
         RectNamespace::AddNamespace(pLua);
         PointNamespace::AddNamespace(pLua);
 

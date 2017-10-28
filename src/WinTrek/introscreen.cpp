@@ -21,6 +21,7 @@ class IntroScreen :
 {
 private:
     TRef<Modeler>       m_pmodeler;
+    UiEngine&           m_uiEngine;
     TRef<Pane>          m_ppane;
     TRef<Image>         m_pimage;
 
@@ -560,12 +561,11 @@ public:
         return m_pimage;
     }
 
-    IntroScreen(Modeler* pmodeler) :
-        m_pmodeler(pmodeler)
+    IntroScreen(Modeler* pmodeler, UiEngine& uiEngine) :
+        m_pmodeler(pmodeler),
+        m_uiEngine(uiEngine)
     {
-        UiEngine* pUiEngine = UiEngine::Create(m_pmodeler->GetEngine());
-        //IntroScreen2* test = IntroScreen2::Create();
-        m_pimage = pUiEngine->LoadImageFromLua("introscreen/introscreen.lua");
+        m_pimage = m_uiEngine.LoadImageFromLua("introscreen/introscreen.lua");
         return;
 
         trekClient.DisconnectClub();
@@ -1345,9 +1345,9 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////
 
-TRef<Screen> CreateIntroScreen(Modeler* pmodeler)
+TRef<Screen> CreateIntroScreen(Modeler* pmodeler, UiEngine& uiEngine)
 {
-    return new IntroScreen(pmodeler);
+    return new IntroScreen(pmodeler, uiEngine);
 }
 
 

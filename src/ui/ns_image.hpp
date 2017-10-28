@@ -5,8 +5,9 @@
 #include "ui.h"
 #include "items.hpp"
 
-TRef<Image> LoadImageFile(Engine* pEngine, PathFinder* pPathFinder, std::string path) {
-    std::string fullpath = pPathFinder->FindPath(path);
+TRef<Image> LoadImageFile(LuaScriptContext& context, std::string path) {
+    std::string fullpath = context.FindPath(path);
+    Engine* pEngine = context.GetEngine();
 
     if (fullpath == "") {
         throw std::runtime_error("Path not found: " + path);
@@ -125,8 +126,9 @@ public:
 
 class ImageNamespace {
 public:
-    static void AddNamespace(sol::state* m_pLua, Engine* pEngine, PathFinder* pPathFinder) {
-        sol::table table = m_pLua->create_table();
+    static void AddNamespace(LuaScriptContext& context) {
+
+        sol::table table = context.GetLua().create_table();
         table["GetEmpty"] = []() {
             return Image::GetEmpty();
         };
@@ -147,8 +149,8 @@ public:
         table["CreateMouseEvent"] = [](Image* image) {
             return (Image*)new MouseEventImage(image);
         };
-        table["LoadFile"] = [pEngine, pPathFinder](std::string path) {
-            return LoadImageFile(pEngine, pPathFinder, path);
+        table["LoadFile"] = [&context](std::string path) {
+            return LoadImageFile(context, path);
         };
         table["Group"] = [](sol::table list) {
             TRef<GroupImage> pgroup = new GroupImage();
@@ -196,6 +198,6 @@ public:
             
         };
 
-        m_pLua->set("Image", table);
+        context.GetLua().set("Image", table);
     }
 };

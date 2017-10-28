@@ -9,12 +9,12 @@
 #include "ns_file.hpp"
 #include "ns_font.hpp"
 #include "ns_point.hpp"
+#include "ns_screen.hpp"
 
 #include <stdexcept>
 #include <fstream>
 
 std::string UiEngine::m_stringLogPath = "";
-
 
 void WriteLog(const std::string &text)
 {
@@ -46,25 +46,32 @@ public:
 
         //m_pLua->new_usertype<Image>("Image");// , sol::base_classes, sol::bases<TRef<Image>>());
 
-        ImageNamespace::AddNamespace(m_pLua, pEngine, &m_pathfinder);
-        EventNamespace::AddNamespace(m_pLua);
-
-        MathNamespace::AddNamespace(m_pLua);
-        RectNamespace::AddNamespace(m_pLua);
-        PointNamespace::AddNamespace(m_pLua);
-
-        ColorNamespace::AddNamespace(m_pLua);
-
-        FileNamespace::AddNamespace(m_pLua, this);
-
-        FontNamespace::AddNamespace(m_pLua);
-
-        m_pLua->new_usertype<MouseEventImage>("MouseEventImage",
-            sol::base_classes, sol::bases<Image>()
-            );
+        
     }
 
     ~LoaderImpl() {
+    }
+
+    void InitNamespaces(LuaScriptContext& context) {
+        auto pLua = &context.GetLua();
+        ImageNamespace::AddNamespace(context);
+        EventNamespace::AddNamespace(pLua);
+
+        MathNamespace::AddNamespace(pLua);
+        RectNamespace::AddNamespace(pLua);
+        PointNamespace::AddNamespace(pLua);
+
+        ColorNamespace::AddNamespace(pLua);
+
+        FileNamespace::AddNamespace(pLua, this);
+
+        FontNamespace::AddNamespace(pLua);
+
+        ScreenNamespace::AddNamespace(context);
+
+        pLua->new_usertype<MouseEventImage>("MouseEventImage",
+            sol::base_classes, sol::bases<Image>()
+            );
     }
 
     sol::function LoadScript(std::string subpath) {
@@ -87,14 +94,7 @@ public:
 
 class Executor {
 
-private:
-    LoaderImpl* m_pLoader;
-
 public:
-
-    Executor(LoaderImpl& pLoader) {
-        m_pLoader = &pLoader;
-    }
 
     template <class T>
     T Execute(sol::function script) {
@@ -120,17 +120,71 @@ public:
     }
 };
 
+class LuaScriptContextImpl : public LuaScriptContext {
+private:
+    TRef<Engine> m_pEngine;
+    TRef<ISoundEngine> m_pSoundEngine;
+    LoaderImpl m_loader;
+    PathFinder m_pathFinder;
+
+    sol::state m_lua;
+
+public:
+
+    LuaScriptContextImpl(Engine* pEngine, ISoundEngine* pSoundEngine, std::string stringArtPath) :
+        m_pEngine(pEngine),
+        m_pSoundEngine(pSoundEngine),
+        m_loader(LoaderImpl(m_lua, pEngine, {
+            stringArtPath + "/PBUI",
+            stringArtPath
+        })),
+        m_pathFinder(PathFinder({
+            stringArtPath + "/PBUI",
+            stringArtPath
+        }))
+    {
+        m_loader.InitNamespaces(*this);
+    }
+
+    sol::state& GetLua() {
+        return m_lua;
+    }
+
+    sol::function LoadScript(std::string path) {
+        return m_loader.LoadScript(path);
+    }
+
+    std::string FindPath(std::string path) {
+        std::string full_path = m_pathFinder.FindPath(path);
+        if (full_path == "") {
+            throw std::runtime_error("File path not found: " + path);
+        }
+        return full_path;
+    }
+
+    Engine* GetEngine() {
+        return m_pEngine;
+    }
+
+    ISoundEngine* GetSoundEngine() {
+        return m_pSoundEngine;
+    }
+
+};
+
 class UiEngineImpl : public UiEngine {
 
 private:
     TRef<Engine> m_pEngine;
+    TRef<ISoundEngine> m_pSoundEngine;
 
     TRef<EventSourceImpl> m_pReloadEventSource;
 
 
 public:
-    UiEngineImpl(Engine* pEngine) : 
+    UiEngineImpl(Engine* pEngine, ISoundEngine* pSoundEngine) :
         m_pEngine(pEngine),
+        m_pSoundEngine(pSoundEngine),
         m_pReloadEventSource(new EventSourceImpl())
     {
     }
@@ -146,18 +200,13 @@ public:
     //}
 
     TRef<Image> InnerLoadImageFromLua(std::string path) {
-        sol::state lua;
+        std::unique_ptr<LuaScriptContextImpl> pContext = std::make_unique<LuaScriptContextImpl>(m_pEngine, m_pSoundEngine, m_stringArtPath);
 
-        LoaderImpl loader = LoaderImpl(lua, m_pEngine, {
-            m_stringArtPath + "/PBUI",
-            m_stringArtPath
-        });
-
-        Executor executor = Executor(loader);
+        Executor executor = Executor();
 
         WriteLog(path + ": " + "Loading");
         try {
-            sol::function script = loader.LoadScript(path);
+            sol::function script = pContext->LoadScript(path);
 
             WriteLog(path + ": " + "Parsed");
 
@@ -208,10 +257,10 @@ public:
 
 
 TRef<UiEngine> g_pUiEngine;
-UiEngine* UiEngine::Create(Engine* pEngine)
+UiEngine* UiEngine::Create(Engine* pEngine, ISoundEngine*  pSoundEngine)
 {
     if (!g_pUiEngine) {
-        g_pUiEngine = new UiEngineImpl(pEngine);
+        g_pUiEngine = new UiEngineImpl(pEngine, pSoundEngine);
     }
     return g_pUiEngine;
 }

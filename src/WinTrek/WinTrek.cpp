@@ -1202,6 +1202,7 @@ public:
     // Screens
     //
 
+    TRef<UiEngine>       m_pUiEngine;
     TRef<Image>          m_pimageScreen;
     TRef<Screen>         m_pscreen;
     ScreenID             m_screen;
@@ -2344,7 +2345,7 @@ public:
                     break;
 
                 case ScreenIDIntroScreen:
-					SetUiScreen(CreateIntroScreen(GetModeler()));
+					SetUiScreen(CreateIntroScreen(GetModeler(), *m_pUiEngine));
                     break;
 
 				case ScreenIDSplashScreen:
@@ -2422,7 +2423,7 @@ public:
 							}
 						}
 						GetWindow()->screen(ScreenIDIntroScreen);
-						SetUiScreen(CreateIntroScreen(GetModeler()));
+						SetUiScreen(CreateIntroScreen(GetModeler(), *m_pUiEngine));
 	                    break;
 					}
 #else
@@ -3007,6 +3008,8 @@ public:
 
         InitializeSoundTemplates();
 
+        m_pUiEngine = UiEngine::Create(m_pengine, m_pSoundEngine);
+
         //
         // Load the Quick Chat Info
         //
@@ -3364,7 +3367,7 @@ public:
         //
         // intro.avi video moved up
         //
-		TRef<Screen> introscr = CreateIntroScreen(GetModeler());
+		TRef<Screen> introscr = CreateIntroScreen(GetModeler(), *m_pUiEngine);
 		SetUiScreen(introscr);
         m_screen = ScreenIDIntroScreen;
         RestoreCursor();
@@ -9010,8 +9013,7 @@ public:
             if (ks.bDown && ks.bAlt) {
                 switch (ks.vk) {
                 case VK_F1:
-                    //ugly hack
-                    UiEngine::Create(GetEngine())->TriggerReload();
+                    m_pUiEngine->TriggerReload();
                     return true;
                 }
             }

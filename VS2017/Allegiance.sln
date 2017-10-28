@@ -151,6 +151,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AllSrvUI", "AllSrvUI.vcxpro
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "training", "training.vcxproj", "{281F3AC6-FAD1-40F4-B798-F634A6162D39}"
+	ProjectSection(ProjectDependencies) = postProject
+		{77F30611-0850-48F7-865F-A4571A7C150C} = {77F30611-0850-48F7-865F-A4571A7C150C}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine.vcxproj", "{D619B179-7FC4-4DB6-9794-1D3C75717D15}"
 EndProject
@@ -216,6 +219,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ui", "Ui.vcxproj", "{77F30611-0850-48F7-865F-A4571A7C150C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D619B179-7FC4-4DB6-9794-1D3C75717D15} = {D619B179-7FC4-4DB6-9794-1D3C75717D15}
+		{F81BB9EE-DD86-415E-87E3-B60732EFD72F} = {F81BB9EE-DD86-415E-87E3-B60732EFD72F}
 	EndProjectSection
 EndProject
 Global

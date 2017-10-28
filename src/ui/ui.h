@@ -1,5 +1,6 @@
 #pragma once
 
+#include "soundengine.h"
 #include "model.h"
 #include "engine.h"
 

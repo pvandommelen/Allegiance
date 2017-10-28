@@ -7,6 +7,8 @@
 #include "ns_event.hpp"
 #include "ns_image.hpp"
 #include "ns_file.hpp"
+#include "ns_font.hpp"
+#include "ns_point.hpp"
 
 #include <stdexcept>
 #include <fstream>
@@ -49,10 +51,13 @@ public:
 
         MathNamespace::AddNamespace(m_pLua);
         RectNamespace::AddNamespace(m_pLua);
+        PointNamespace::AddNamespace(m_pLua);
 
         ColorNamespace::AddNamespace(m_pLua);
 
         FileNamespace::AddNamespace(m_pLua, this);
+
+        FontNamespace::AddNamespace(m_pLua);
 
         m_pLua->new_usertype<MouseEventImage>("MouseEventImage",
             sol::base_classes, sol::bases<Image>()

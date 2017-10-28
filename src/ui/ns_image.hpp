@@ -76,11 +76,31 @@ public:
     void Evaluate()
     {
         A value = ((TStaticValue<A>*)GetChild(1))->GetValue();
-        //Value* value = ((TStaticValue<A>*)GetChild(1));
 
-        SetImage(GetEvaluatedImage(value));
+        Image* evaluated = GetEvaluatedImage(value);
+
+        ZAssert(evaluated != NULL);
+
+        SetImage(evaluated);
     }
 
+};
+
+template<class A>
+class CallbackEvaluateImage : public EvaluateImage<A> {
+
+    std::function<Image*(A)> m_callback;
+
+protected:
+    Image* GetEvaluatedImage(A value) {
+        return m_callback(value);
+    }
+
+public:
+    CallbackEvaluateImage(TStaticValue<A>* value, std::function<Image*(A)> callback) :
+        EvaluateImage(value),
+        m_callback(callback)
+    {}
 };
 
 class BoolSwitchImage : public EvaluateImage<bool> {
@@ -88,9 +108,8 @@ class BoolSwitchImage : public EvaluateImage<bool> {
     std::map<bool, TRef<Image>> m_options;
 
 protected:
-    Image* GetEvaluatedImage(bool pValue) {
-        bool value = pValue;// ((TStaticValue<bool>*)pValue)->GetValue();
-        auto find = m_options.find(value);
+    Image* GetEvaluatedImage(bool bValue) {
+        auto find = m_options.find(bValue);
         if (find == m_options.end()) {
             return Image::GetEmpty();
         }
@@ -111,10 +130,20 @@ public:
         table["GetEmpty"] = []() {
             return Image::GetEmpty();
         };
-        table["CreateExtent"] = [](RectValue* rect, ColorValue* color) {
-            auto img = CreateExtentImage(rect, color);
-            return img;
-        };
+        table["CreateExtent"] = sol::overload(
+            [](RectValue* rect, ColorValue* color) {
+                return CreateExtentImage(rect, color);
+            },
+            [](PointValue* pPoint, ColorValue* color) {
+                return CreateExtentImage(
+                    new RectValue(Rect(
+                        Point(0, 0), 
+                        pPoint->GetValue()
+                    )), 
+                    color
+                );
+            }
+        );
         table["CreateMouseEvent"] = [](Image* image) {
             return (Image*)new MouseEventImage(image);
         };
@@ -151,6 +180,20 @@ public:
 
             }
             throw std::runtime_error("Expected value argument of Image.Switch to be either a wrapped or unwrapped bool, int, or string");
+        };
+        table["String"] = [](FontValue* font, ColorValue* color, int width, std::string string) {
+            return CreateStringImage(JustifyLeft(), font->GetValue(), color, width, new StringValue(ZString(string.c_str())));
+        };
+        table["Translate"] = [](Image* pimage, PointValue* pPoint) {
+            //bit of a hack. The inner function only gets called in the next event loop. This keeps a reference around. I assume this gets cleaned up correctly.
+            TRef<Image> imageRefKeeping = pimage;
+            return (Image*)new CallbackEvaluateImage<Point>(pPoint, [imageRefKeeping](Point point) {
+                return (Image*)new TranslateImage(
+                    imageRefKeeping,
+                    point
+                );
+            });
+            
         };
 
         m_pLua->set("Image", table);

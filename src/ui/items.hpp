@@ -34,6 +34,7 @@ public:
 
 class MouseEventImage : public WrapImage {
     std::map<std::string, TRef<EventSourceImpl>> m_mapEventSources;
+    bool m_bDown = false;
 
 public:
 
@@ -65,6 +66,40 @@ public:
     }
 
     void MouseLeave(IInputProvider* pprovider) {
+        m_bDown = false; //reset state
         Trigger("mouse.leave");
+    }
+
+    void TriggerMouseButton(std::string button_name, std::string what) {
+        Trigger("mouse." + button_name + "." + what);
+    }
+
+    MouseResult Button(IInputProvider* pprovider, const Point& point, int button, bool bCaptured, bool bInside, bool bDown)
+    {
+        // inspired by button.cpp~:~690
+        if (button != 0 && button != 1) {
+            return MouseResult();
+        }
+        std::string button_name = button == 0 ? "left" : "right";
+
+        if (bDown) {
+            m_bDown = true;
+            TriggerMouseButton(button_name, "down");
+
+            if (pprovider->IsDoubleClick()) {
+                TriggerMouseButton(button_name, "doubleclick");
+            }
+        }
+        else {
+            bool wasDown = m_bDown;
+            m_bDown = false;
+            TriggerMouseButton(button_name, "up");
+
+            if (wasDown) {
+                TriggerMouseButton(button_name, "click");
+            }
+        }
+
+        return MouseResult();
     }
 };

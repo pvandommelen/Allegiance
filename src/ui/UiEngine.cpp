@@ -31,6 +31,58 @@ void UiEngine::SetGlobalArtPath(std::string path)
     m_stringArtPath = path;
 }
 
+class UiScreenConfigurationImpl : public UiScreenConfiguration {
+
+    std::string m_strPath;
+    std::map<std::string, TRef<IEventSink>> m_mapSinks;
+
+public:
+    UiScreenConfigurationImpl(std::string path, std::map<std::string, TRef<IEventSink>> mapSinks) {
+        m_strPath = path;
+        m_mapSinks = mapSinks;
+    }
+
+    std::string GetPath() {
+        return m_strPath;
+    }
+
+    IEventSink& GetEventSink(std::string name) {
+        auto find = m_mapSinks.find(name);
+        if (find == m_mapSinks.end()) {
+            throw std::runtime_error("Name of event sink not found: " + name);
+        }
+        return *(find->second);
+    }
+
+};
+
+class CallbackSink : public IEventSink {
+private:
+    const std::function<void()> m_callback;
+
+public:
+    CallbackSink(const std::function<void()> callback) :
+        m_callback(callback)
+    {}
+
+    bool OnEvent(IEventSource* source) {
+        m_callback();
+        return true;
+    }
+
+};
+
+UiScreenConfiguration* UiScreenConfiguration::Create(std::string path, std::map<std::string, std::function<void()>> event_listeners) {
+    std::map<std::string, TRef<IEventSink>> sinks;
+
+    std::for_each(event_listeners.begin(), event_listeners.end(),
+        [&sinks](auto& p) {
+        sinks[p.first] = new CallbackSink(p.second);
+    });
+
+    return new UiScreenConfigurationImpl(path, sinks);
+}
+
 class LoaderImpl : public Loader {
 
 private:
@@ -54,6 +106,15 @@ public:
 
     void InitNamespaces(LuaScriptContext& context) {
         auto pLua = &context.GetLua();
+
+        pLua->open_libraries(sol::lib::base, sol::lib::string, sol::lib::table, sol::lib::math);
+        pLua->set("loadfile", [](std::string path) {
+            throw std::runtime_error("The standard function loadfile is disabled, use File.LoadLua(string)");
+        });
+        pLua->set("load", []() {
+            throw std::runtime_error("The standard function load is disabled, what would you use this for?");
+        });
+
         ImageNamespace::AddNamespace(context);
         EventNamespace::AddNamespace(pLua);
 
@@ -75,7 +136,6 @@ public:
     }
 
     sol::function LoadScript(std::string subpath) {
-
         std::string path = m_pathfinder.FindPath(subpath);
         if (path == "") {
             throw std::runtime_error("File not found: " + subpath);
@@ -126,14 +186,16 @@ private:
     TRef<ISoundEngine> m_pSoundEngine;
     LoaderImpl m_loader;
     PathFinder m_pathFinder;
+    UiScreenConfiguration* m_pConfiguration;
 
     sol::state m_lua;
 
 public:
 
-    LuaScriptContextImpl(Engine* pEngine, ISoundEngine* pSoundEngine, std::string stringArtPath) :
+    LuaScriptContextImpl(Engine* pEngine, ISoundEngine* pSoundEngine, std::string stringArtPath, UiScreenConfiguration* pConfiguration) :
         m_pEngine(pEngine),
         m_pSoundEngine(pSoundEngine),
+        m_pConfiguration(pConfiguration),
         m_loader(LoaderImpl(m_lua, pEngine, {
             stringArtPath + "/PBUI",
             stringArtPath
@@ -170,6 +232,10 @@ public:
         return m_pSoundEngine;
     }
 
+    IEventSink& GetExternalEventSink(std::string name) {
+        return m_pConfiguration->GetEventSink(name);
+    }
+
 };
 
 class UiEngineImpl : public UiEngine {
@@ -199,10 +265,12 @@ public:
     //
     //}
 
-    TRef<Image> InnerLoadImageFromLua(std::string path) {
-        std::unique_ptr<LuaScriptContextImpl> pContext = std::make_unique<LuaScriptContextImpl>(m_pEngine, m_pSoundEngine, m_stringArtPath);
+    TRef<Image> InnerLoadImageFromLua(UiScreenConfiguration* screenConfiguration) {
+        std::unique_ptr<LuaScriptContextImpl> pContext = std::make_unique<LuaScriptContextImpl>(m_pEngine, m_pSoundEngine, m_stringArtPath, screenConfiguration);
 
         Executor executor = Executor();
+
+        auto path = screenConfiguration->GetPath();
 
         WriteLog(path + ": " + "Loading");
         try {
@@ -224,13 +292,13 @@ public:
     class ImageReloadSink : public IEventSink, public WrapImage {
 
         TRef<UiEngineImpl> m_pUiEngine;
-        std::string m_path;
+        UiScreenConfiguration* m_pConfiguration;
 
     public:
-        ImageReloadSink(UiEngineImpl* pUiEngine, std::string path) :
+        ImageReloadSink(UiEngineImpl* pUiEngine, UiScreenConfiguration* screenConfiguration) :
             m_pUiEngine(pUiEngine),
-            m_path(path),
-            WrapImage(pUiEngine->InnerLoadImageFromLua(path))
+            m_pConfiguration(screenConfiguration),
+            WrapImage(pUiEngine->InnerLoadImageFromLua(screenConfiguration))
         {
         }
 
@@ -239,17 +307,19 @@ public:
         }
 
         bool OnEvent(IEventSource* pevent) {
-            SetImage(m_pUiEngine->InnerLoadImageFromLua(m_path));
+            SetImage(m_pUiEngine->InnerLoadImageFromLua(m_pConfiguration));
             return true;
         }
 
     };
 
-    TRef<Image> LoadImageFromLua(std::string path) {
+    TRef<Image> LoadImageFromLua(UiScreenConfiguration* screenConfiguration) {
         //TRef<Image> inner = InnerLoadImageFromLua(path);
         //TRef<Image> wrapper = new WrapImage(inner);
 
-        ImageReloadSink* result = new ImageReloadSink(this, path);
+        auto path = screenConfiguration->GetPath();
+
+        ImageReloadSink* result = new ImageReloadSink(this, screenConfiguration);
         m_pReloadEventSource->AddSink(result);
         return result;
     }

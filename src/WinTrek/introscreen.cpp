@@ -565,10 +565,42 @@ public:
         m_pmodeler(pmodeler),
         m_uiEngine(uiEngine)
     {
-        m_pimage = m_uiEngine.LoadImageFromLua("introscreen/introscreen.lua");
-        return;
+        std::map<std::string, std::function<void()>> listeners;
+        listeners["open.training"] = [this]() {
+            IntroScreen::OnButtonTraining();
+        };
+        listeners["open.motd"] = [this]() {
+            IntroScreen::OnButtonInternet();
+        };
+        listeners["open.website"] = [this]() {
+            GetWindow()->ShowWebPage();
+        };
+        listeners["open.discord"] = [this]() {
+            IntroScreen::OnButtonDiscord();
+        };
+        listeners["open.options"] = [this]() {
+            GetWindow()->ShowOptionsMenu();
+        };
+        listeners["open.lan"] = [this]() {
+            IntroScreen::OnButtonLAN();
+        };
+        listeners["open.intro"] = [this]() {
+            IntroScreen::OnButtonIntro();
+        };
+        listeners["open.credits"] = [this]() {
+            IntroScreen::OnButtonCredits();
+        };
+        listeners["open.help"] = [this]() {
+            IntroScreen::OnButtonHelp();
+        };
+        listeners["open.exit"] = [this]() {
+            IntroScreen::OnButtonExit();
+        };
+
+        m_pimage = m_uiEngine.LoadImageFromLua(UiScreenConfiguration::Create("introscreen/introscreen.lua", listeners));
 
         trekClient.DisconnectClub();
+
 
         TRef<INameSpace> pnsIntroScreen = m_pmodeler->CreateNameSpace("introscreendata", m_pmodeler->GetNameSpace("gamepanes"));
         pnsIntroScreen->AddMember("hoverNone",       new Number(hoverNone        ));
@@ -594,79 +626,6 @@ public:
 		m_pthing = NULL;
 #endif
         TRef<INameSpace> pns = pmodeler->GetNameSpace("introscreen");
-        CastTo(m_ppane, pns->FindMember("screen"));
-        CastTo(m_pbuttonPlayLan,    pns->FindMember("playLanButtonPane"));
-        CastTo(m_pbuttonPlayInt,    pns->FindMember("playIntButtonPane"));
-		CastTo(m_pbuttonDiscord, pns->FindMember("discordButtonPane"));
-
-#ifdef USEAZ
-        CastTo(m_pbuttonZoneClub,   pns->FindMember("zoneClubButtonPane" ));
-#endif
-        //CastTo(m_pbuttonTraining,   pns->FindMember("trainButtonPane"));
-        CastTo(m_pbuttonTrainingBig,pns->FindMember("trainBigButtonPane"));
-        CastTo(m_pbuttonZoneWeb,    pns->FindMember("zoneWebButtonPane" ));
-        CastTo(m_pbuttonOptions,     pns->FindMember("optionsButtonPane"));
-        CastTo(m_pbuttonIntro,      pns->FindMember("introButtonPane"));
-        CastTo(m_pbuttonCredits,    pns->FindMember("creditsButtonPane"));
-        //CastTo(m_pbuttonQuickstart, pns->FindMember("quickstartButtonPane"));
-        CastTo(m_pbuttonExit,       pns->FindMember("exitButtonPane" ));
-        CastTo(m_pbuttonHelp,       pns->FindMember("helpButtonPane" ));
-        
-
-        //AddEventTarget(OnButtonGames,       m_pbuttonPlayLan->GetEventSource());
-        //AddEventTarget(OnButtonTraining,    m_pbuttonTraining->GetEventSource());
-
-		
-		AddEventTarget(&IntroScreen::OnButtonDiscord, m_pbuttonDiscord->GetEventSource());
-		AddEventTarget(&IntroScreen::OnButtonTraining,    m_pbuttonTrainingBig->GetEventSource());
-        AddEventTarget(&IntroScreen::OnButtonExit,        m_pbuttonExit->GetEventSource());
-        AddEventTarget(&IntroScreen::OnButtonHelp,        m_pbuttonHelp->GetEventSource());
-#ifdef USEAZ
-        AddEventTarget(OnButtonZoneClub,    m_pbuttonZoneClub->GetEventSource());
-#endif
-        AddEventTarget(&IntroScreen::OnButtonInternet,    m_pbuttonPlayInt->GetEventSource());
-        AddEventTarget(&IntroScreen::OnButtonLAN,         m_pbuttonPlayLan->GetEventSource());
-        AddEventTarget(&IntroScreen::OnButtonZoneWeb,     m_pbuttonZoneWeb->GetEventSource());
-        AddEventTarget(&IntroScreen::OnButtonOptions,     m_pbuttonOptions->GetEventSource());
-        AddEventTarget(&IntroScreen::OnButtonCredits,     m_pbuttonCredits->GetEventSource());
-        AddEventTarget(&IntroScreen::OnButtonIntro,       m_pbuttonIntro->GetEventSource());
-        
-
-        AddEventTarget(&IntroScreen::OnHoverPlayLan,      m_pbuttonPlayLan->GetMouseEnterEventSource());
-        AddEventTarget(&IntroScreen::OnHoverPlayInt,      m_pbuttonPlayInt->GetMouseEnterEventSource());
-#ifdef USEAZ
-        AddEventTarget(OnHoverZoneClub,     m_pbuttonZoneClub->GetMouseEnterEventSource());
-#endif
-        //AddEventTarget(OnHoverTrain,        m_pbuttonTraining->GetMouseEnterEventSource());
-        AddEventTarget(&IntroScreen::OnHoverTrain,        m_pbuttonTrainingBig->GetMouseEnterEventSource());
-        AddEventTarget(&IntroScreen::OnHoverZoneWeb,      m_pbuttonZoneWeb->GetMouseEnterEventSource());
-        AddEventTarget(&IntroScreen::OnHoverOptions,       m_pbuttonOptions->GetMouseEnterEventSource());
-        AddEventTarget(&IntroScreen::OnHoverIntro,        m_pbuttonIntro->GetMouseEnterEventSource());
-        AddEventTarget(&IntroScreen::OnHoverCredits,      m_pbuttonCredits->GetMouseEnterEventSource());
-        //AddEventTarget(OnHoverQuickstart,   m_pbuttonQuickstart->GetMouseEnterEventSource());
-        AddEventTarget(&IntroScreen::OnHoverExit,         m_pbuttonExit->GetMouseEnterEventSource());
-        AddEventTarget(&IntroScreen::OnHoverHelp,         m_pbuttonHelp->GetMouseEnterEventSource());
-
-        AddEventTarget(&IntroScreen::OnHoverNone,     m_pbuttonPlayLan->GetMouseLeaveEventSource());
-        AddEventTarget(&IntroScreen::OnHoverNone,     m_pbuttonPlayInt->GetMouseLeaveEventSource());
-#ifdef USEAZ
-        AddEventTarget(OnHoverNone,     m_pbuttonZoneClub->GetMouseLeaveEventSource());
-#endif
-        //AddEventTarget(OnHoverNone,     m_pbuttonTraining->GetMouseLeaveEventSource());
-        AddEventTarget(&IntroScreen::OnHoverNone,     m_pbuttonTrainingBig->GetMouseLeaveEventSource());
-        AddEventTarget(&IntroScreen::OnHoverNone,     m_pbuttonZoneWeb->GetMouseLeaveEventSource());
-        AddEventTarget(&IntroScreen::OnHoverNone,     m_pbuttonOptions->GetMouseLeaveEventSource());
-        AddEventTarget(&IntroScreen::OnHoverNone,     m_pbuttonIntro->GetMouseLeaveEventSource());
-        AddEventTarget(&IntroScreen::OnHoverNone,     m_pbuttonCredits->GetMouseLeaveEventSource());
-        //AddEventTarget(OnHoverNone,     m_pbuttonQuickstart->GetMouseLeaveEventSource());
-        AddEventTarget(&IntroScreen::OnHoverNone,     m_pbuttonHelp->GetMouseLeaveEventSource());
-        AddEventTarget(&IntroScreen::OnHoverNone,     m_pbuttonExit->GetMouseLeaveEventSource());
-
-        //m_pbuttonPlayLan->SetEnabled(false);
-        //m_pbuttonPlayInt->SetEnabled(false);
-
-		// BT - Steam - Hiding these irrelevant buttons for now.
-		m_pbuttonPlayLan->SetHidden(true);
 
         m_pfindServerPopup = new FindServerPopup(pns, this);
           
@@ -722,33 +681,6 @@ public:
         bHaveVisited = true;
 
         trekClient.FlushSessionLostMessage();
-
-#ifdef ENABLE3DINTROSCREEN
-		// KGJV test
-		{
-			m_pwrapImage->SetImage((Image*)(Value *)pns->FindMember("bkImage"));
-			m_ppaneGeo = CreateGeoPane(
-				pns->FindPoint("geoSize"),
-				pns->FindPoint("geoPosition")
-			);
-			m_ppaneGeo->SetOffset(pns->FindWinPoint("geoPosition"));
-			m_ppane->InsertAtTop(m_ppaneGeo);
-
-			TRef<StringValue> pstring; CastTo(pstring, pns->FindMember("geoModel"));
-			TRef<INameSpace> pnsgeo = m_pmodeler->GetNameSpace(pstring->GetValue());
-	
-			if (pnsgeo) {
-				m_pthing = ThingGeo::Create(m_pmodeler, m_ptime);
-				m_pthing->LoadMDL(0, pnsgeo, NULL);
-				m_pthing->SetShadeAlways(true);
-				//m_pthing->SetTransparentObjects(true);
-				//m_pthing->SetShowBounds(true);
-		
-				SetGeo(m_pthing->GetGeo());
-			}
-	    
-	    }
-#endif
 
     }
 

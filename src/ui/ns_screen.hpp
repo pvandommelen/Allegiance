@@ -42,6 +42,12 @@ public:
             ZSucceeded(CreateWaveFileSoundTemplate(pTemplate, full_path.c_str()));
             pEventSource->AddSink(new PlaySoundSink(context.GetSoundEngine(), pTemplate));
         };
+
+        table["DelegateEventToExternalSink"] = [&context](std::string path, IEventSource* pEventSource) {
+            IEventSink& sink = context.GetExternalEventSink(path);
+            pEventSource->AddSink(&sink);
+        };
+
         context.GetLua().set("Screen", table);
     }
 };

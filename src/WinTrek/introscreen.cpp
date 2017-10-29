@@ -570,7 +570,12 @@ public:
             IntroScreen::OnButtonTraining();
         };
         listeners["open.motd"] = [this]() {
-            IntroScreen::OnButtonInternet();
+            g_bAutomaticallySkipMotdScreen = false;
+            GetWindow()->screen(ScreenIDZoneClubScreen);
+        };
+        listeners["open.lobby"] = [pmodeler]() {
+            g_bAutomaticallySkipMotdScreen = true;
+            GetWindow()->screen(ScreenIDZoneClubScreen);
         };
         listeners["open.website"] = [this]() {
             GetWindow()->ShowWebPage();

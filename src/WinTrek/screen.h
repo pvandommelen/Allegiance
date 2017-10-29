@@ -47,6 +47,7 @@ TRef<Screen> CreateGameStartingScreen(Modeler* pmodeler);
 TRef<IPopup> CreateMissionParametersPopup(Modeler* pmodeler);
 
 extern bool g_bQuickstart;
+extern bool g_bAutomaticallySkipMotdScreen;
 extern bool g_bReloaded;   // as in after AutoUpdate
 extern int  g_civStart;
 extern bool bStartTraining;

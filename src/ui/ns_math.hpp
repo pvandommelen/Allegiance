@@ -63,9 +63,19 @@ public:
     static void AddNamespace(sol::state* m_pLua) {
         sol::table table = m_pLua->create_table();
 
-        table["Create"] = [](int left, int bottom, int width, int height) {
-            return new RectValue(Rect(left, bottom, width, height));
-        };
+        table["Create"] = sol::overload(
+            [](int xmin, int ymin, int xmax, int ymax) {
+                return new RectValue(Rect(xmin, ymin, xmax, ymax));
+            },
+            [](sol::object xmin, sol::object ymin, sol::object xmax, sol::object ymax) {
+                return RectTransform::Create(
+                    wrapValue<float>(xmin),
+                    wrapValue<float>(ymin),
+                    wrapValue<float>(xmax),
+                    wrapValue<float>(ymax)
+                );
+            }
+        );
 
         m_pLua->set("Rect", table);
     }

@@ -31,6 +31,13 @@ public:
     static TRef<ColorValue> Create(Number* r, Number* g, Number* b, Number* a);
 };
 
+class RectTransform {
+public:
+    static TRef<RectValue> Create(Number* xmin, Number* ymin, Number* xmax, Number* ymax);
+    static TRef<RectValue> Create(Number* width, Number* height);
+    static TRef<RectValue> Create(PointValue* pPoint);
+};
+
 template<class TransformedType, class OriginalType>
 class TransformedValue : public TStaticValue<TransformedType> {
 

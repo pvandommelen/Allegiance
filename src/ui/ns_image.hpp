@@ -213,22 +213,70 @@ public:
             });
         };
 
-        table["FitImageY"] = [](Image* pimage, sol::object height) {
-            TRef<Image> imageRefKeeping = pimage;
+        sol::table tableJustification = context.GetLua().create_table();
+        tableJustification["Left"] = (Justification)JustifyLeft();
+        tableJustification["Right"] = (Justification)JustifyRight();
+        tableJustification["XCenter"] = (Justification)JustifyXCenter();
+        tableJustification["Top"] = (Justification)JustifyTop();
+        tableJustification["Bottom"] = (Justification)JustifyBottom();
+        tableJustification["YCenter"] = (Justification)JustifyYCenter();
+        tableJustification["Center"] = (Justification)JustifyCenter();
+        table["Justification"] = tableJustification;
+
+        table["ScaleFit"] = [](Image* pimage, PointValue* pPoint, Justification justification) {
+            //this should maybe be redone to return a custom class instead of using so many wrappers, it's a cool example though
 
             TRef<ImageSize> sizeImage = new ImageSize(pimage);
+            TRef<Number> pImageX = PointTransform::X(sizeImage);
+            TRef<Number> pImageY = PointTransform::Y(sizeImage);
 
-            TRef<Number> pnumber = wrapValue<float>(height);
+            TRef<Number> pContainerX = PointTransform::X(pPoint);
+            TRef<Number> pContainerY = PointTransform::Y(pPoint);
 
-            TRef<Number> scale = NumberTransform::Divide(pnumber, PointTransform::Y(sizeImage));
+            TRef<Number> pScale = NumberTransform::Min(
+                NumberTransform::Divide(pContainerX, pImageX),
+                NumberTransform::Divide(pContainerY, pImageY)
+            );
 
-            TRef<PointValue> p_pointVariable = PointTransform::Create(scale, scale);
+            TRef<Number> pSpaceX = NumberTransform::Subtract(pContainerX, NumberTransform::Multiply(pScale, pImageX));
+            TRef<Number> pSpaceY = NumberTransform::Subtract(pContainerY, NumberTransform::Multiply(pScale, pImageY));
 
-            return
-                (TRef<Image>)new TransformImage(
+            TRef<Number> pNumberZero = new Number(0.0f);
+            TRef<Number> pNumberHalf = new Number(0.5f);
+
+            TRef<Number> pOffsetX;
+            TRef<Number> pOffsetY;
+
+            if (justification.Test(JustifyLeft())) {
+                pOffsetX = pNumberZero;
+            }
+            else if (justification.Test(JustifyRight())) {
+                pOffsetX = pSpaceX;
+            }
+            else {
+                pOffsetX = NumberTransform::Multiply(pNumberHalf, pSpaceX);
+            }
+
+            if (justification.Test(JustifyTop())) {
+                pOffsetY = pSpaceY;
+            }
+            else if (justification.Test(JustifyBottom())) {
+                pOffsetY = pNumberZero;
+            }
+            else {
+                pOffsetY = NumberTransform::Multiply(pNumberHalf, pSpaceY);
+            }
+
+            TRef<PointValue> pPointTranslate = PointTransform::Create(pOffsetX, pOffsetY);
+            TRef<PointValue> pPointScale = PointTransform::Create(pScale, pScale);
+
+            return (TRef<Image>)new TransformImage(
+                new TransformImage(
                     pimage,
-                    new ScaleTransform2(p_pointVariable)
-                );
+                    new ScaleTransform2(pPointScale)
+                ),
+                new TranslateTransform2(pPointTranslate)
+            );
         };
 
         context.GetLua().set("Image", table);

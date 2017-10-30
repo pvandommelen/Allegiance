@@ -281,3 +281,37 @@ TRef<ColorValue> ColorTransform::Create(Number* r, Number* g, Number* b, Number*
         a
     );
 };
+
+
+// ### Rect
+
+TRef<RectValue> RectTransform::Create(Number* xmin, Number* ymin, Number* xmax, Number* ymax) {
+    return new TransformedValue4<Rect, float, float, float, float>(
+        [](float xmin, float ymin, float xmax, float ymax) {
+            return Rect(xmin, ymin, xmax, ymax);
+        },
+        xmin,
+        ymin,
+        xmax,
+        ymax
+    );
+};
+
+TRef<RectValue> RectTransform::Create(Number* width, Number* height) {
+    return new TransformedValue2<Rect, float, float>(
+        [](float width, float height) {
+            return Rect(0, 0, width, height);
+        },
+        width,
+        height
+    );
+};
+
+TRef<RectValue> RectTransform::Create(PointValue* pPoint) {
+    return new TransformedValue<Rect, Point>(
+        [](Point point) {
+            return Rect(0, 0, point.X(), point.Y());
+        },
+        pPoint
+    );
+};

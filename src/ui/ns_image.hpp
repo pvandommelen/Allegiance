@@ -124,6 +124,22 @@ public:
     {}
 };
 
+class ImageSize : public PointValue {
+private:
+    Image* GetImage() { return Image::Cast(GetChild(0)); }
+
+public:
+    ImageSize(Image* pimage) :
+        PointValue(pimage)
+    {
+    }
+
+    void Evaluate()
+    {
+        GetValueInternal() = Point::Cast(GetImage()->GetBounds().GetRect().Size());
+    }
+};
+
 class ImageNamespace {
 public:
     static void AddNamespace(LuaScriptContext& context) {
@@ -195,7 +211,24 @@ public:
                     point
                 );
             });
-            
+        };
+
+        table["FitImageY"] = [](Image* pimage, sol::object height) {
+            TRef<Image> imageRefKeeping = pimage;
+
+            TRef<ImageSize> sizeImage = new ImageSize(pimage);
+
+            TRef<Number> pnumber = wrapValue<float>(height);
+
+            TRef<Number> scale = NumberTransform::Divide(pnumber, PointTransform::Y(sizeImage));
+
+            TRef<PointValue> p_pointVariable = PointTransform::Create(scale, scale);
+
+            return
+                (Image*)new TransformImage(
+                    pimage,
+                    new ScaleTransform2(p_pointVariable)
+                );
         };
 
         context.GetLua().set("Image", table);

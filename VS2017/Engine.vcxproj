@@ -154,6 +154,7 @@
     <ClCompile Include="..\src\engine\transform.cpp" />
     <ClCompile Include="..\src\engine\transform2.cpp" />
     <ClCompile Include="..\src\engine\value.cpp" />
+    <ClCompile Include="..\src\engine\valuetransform.cpp" />
     <ClCompile Include="..\src\engine\VBIBManager.cpp" />
     <ClCompile Include="..\src\engine\VertexGenerator.cpp" />
     <ClCompile Include="..\src\engine\VideoSettingsDX9.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="..\src\engine\transform.h" />
     <ClInclude Include="..\src\engine\UIVertexDefn.h" />
     <ClInclude Include="..\src\engine\value.h" />
+    <ClInclude Include="..\src\engine\valuetransform.h" />
     <ClInclude Include="..\src\engine\VBIBManager.h" />
     <ClInclude Include="..\src\engine\VertexGenerator.h" />
     <ClInclude Include="..\src\engine\VideoSettingsDX9.h" />

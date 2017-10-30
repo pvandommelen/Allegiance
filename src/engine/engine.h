@@ -61,6 +61,7 @@ class Material;
 //class Palette;
 
 #include "value.h"
+#include "valuetransform.h"
 #include "font.h"
 #include "namespace.h"
 #include "mdl.h"

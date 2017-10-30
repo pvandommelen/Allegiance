@@ -1590,7 +1590,7 @@ class ThingSiteImpl : public ThingSitePrivate
             if (m_pthing->GetFlareCount() < 4.0f)
             {
                 TRef<Number> ptimeArg = GetWindow()->GetTime();
-                TRef<Number> ptime = Subtract(ptimeArg, ptimeArg->MakeConstant());
+                TRef<Number> ptime = NumberTransform::Subtract(ptimeArg, ptimeArg->MakeConstant());
 
                 m_pthing->AddFlare(
                     new TextureGeo(
@@ -1742,8 +1742,8 @@ class ThingSiteImpl : public ThingSitePrivate
             Number* ptime = GetWindow()->GetTime();
             TRef<AnimatedImage> pimage = 
                 GetWindow()->LoadAnimatedImage(
-                    Divide(
-                        Subtract(ptime, ptime->MakeConstant()),
+                    NumberTransform::Divide(
+                        NumberTransform::Subtract(ptime, ptime->MakeConstant()),
                         new Number(2)  // number of seconds to animate through images
                     ),
                     ZString(textureName) + "bmp"

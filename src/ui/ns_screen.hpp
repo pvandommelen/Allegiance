@@ -47,6 +47,12 @@ public:
             IEventSink& sink = context.GetExternalEventSink(path);
             pEventSource->AddSink(&sink);
         };
+        
+        table["GetResolution"] = [&context]() {
+            return (PointValue*)new TransformedValue<Point, WinPoint>([](WinPoint winpoint) {
+                return Point(winpoint.X(), winpoint.Y());
+            }, context.GetEngine()->GetResolutionSizeModifiable());
+        };
 
         context.GetLua().set("Screen", table);
     }

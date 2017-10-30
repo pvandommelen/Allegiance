@@ -64,7 +64,7 @@ private:
 
 
 protected:
-    virtual Image* GetEvaluatedImage(A bValue) = 0;
+    virtual TRef<Image> GetEvaluatedImage(A bValue) = 0;
 
 public:
 
@@ -78,7 +78,7 @@ public:
     {
         A value = ((TStaticValue<A>*)GetChild(1))->GetValue();
 
-        Image* evaluated = GetEvaluatedImage(value);
+        TRef<Image> evaluated = GetEvaluatedImage(value);
 
         ZAssert(evaluated != NULL);
 
@@ -90,15 +90,15 @@ public:
 template<class A>
 class CallbackEvaluateImage : public EvaluateImage<A> {
 
-    std::function<Image*(A)> m_callback;
+    std::function<TRef<Image>(A)> m_callback;
 
 protected:
-    Image* GetEvaluatedImage(A value) {
+    TRef<Image> GetEvaluatedImage(A value) {
         return m_callback(value);
     }
 
 public:
-    CallbackEvaluateImage(TStaticValue<A>* value, std::function<Image*(A)> callback) :
+    CallbackEvaluateImage(TStaticValue<A>* value, std::function<TRef<Image>(A)> callback) :
         EvaluateImage(value),
         m_callback(callback)
     {}
@@ -109,7 +109,7 @@ class BoolSwitchImage : public EvaluateImage<bool> {
     std::map<bool, TRef<Image>> m_options;
 
 protected:
-    Image* GetEvaluatedImage(bool bValue) {
+    TRef<Image> GetEvaluatedImage(bool bValue) {
         auto find = m_options.find(bValue);
         if (find == m_options.end()) {
             return Image::GetEmpty();
@@ -163,7 +163,7 @@ public:
             }
         );
         table["CreateMouseEvent"] = [](Image* image) {
-            return (Image*)new MouseEventImage(image);
+            return (TRef<Image>)new MouseEventImage(image);
         };
         table["LoadFile"] = [&context](std::string path) {
             return LoadImageFile(context, path);
@@ -192,7 +192,7 @@ public:
                     mapOptions[bKey] = value.as<Image*>();
                 });
 
-                return (Image*)new BoolSwitchImage(value.as<ModifiableBoolean*>(), mapOptions);
+                return (TRef<Image>)new BoolSwitchImage(value.as<ModifiableBoolean*>(), mapOptions);
             }
             else if (value.is<bool>() || value.is<int>() || value.is<std::string>()) {
 
@@ -205,8 +205,8 @@ public:
         table["Translate"] = [](Image* pimage, PointValue* pPoint) {
             //bit of a hack. The inner function only gets called in the next event loop. This keeps a reference around. I assume this gets cleaned up correctly.
             TRef<Image> imageRefKeeping = pimage;
-            return (Image*)new CallbackEvaluateImage<Point>(pPoint, [imageRefKeeping](Point point) {
-                return (Image*)new TranslateImage(
+            return (TRef<Image>)new CallbackEvaluateImage<Point>(pPoint, [imageRefKeeping](Point point) {
+                return (TRef<Image>)new TranslateImage(
                     imageRefKeeping,
                     point
                 );
@@ -225,7 +225,7 @@ public:
             TRef<PointValue> p_pointVariable = PointTransform::Create(scale, scale);
 
             return
-                (Image*)new TransformImage(
+                (TRef<Image>)new TransformImage(
                     pimage,
                     new ScaleTransform2(p_pointVariable)
                 );

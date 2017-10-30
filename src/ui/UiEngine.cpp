@@ -41,7 +41,6 @@ public:
         m_strPath = path;
         m_mapSinks = mapSinks;
     }
-
     std::string GetPath() {
         return m_strPath;
     }
@@ -72,7 +71,7 @@ public:
 
 };
 
-UiScreenConfiguration* UiScreenConfiguration::Create(std::string path, std::map<std::string, std::function<void()>> event_listeners) {
+std::shared_ptr<UiScreenConfiguration> UiScreenConfiguration::Create(std::string path, std::map<std::string, std::function<void()>> event_listeners) {
     std::map<std::string, TRef<IEventSink>> sinks;
 
     std::for_each(event_listeners.begin(), event_listeners.end(),
@@ -80,7 +79,7 @@ UiScreenConfiguration* UiScreenConfiguration::Create(std::string path, std::map<
         sinks[p.first] = new CallbackSink(p.second);
     });
 
-    return new UiScreenConfigurationImpl(path, sinks);
+    return std::make_shared<UiScreenConfigurationImpl>(path, sinks);
 }
 
 class LoaderImpl : public Loader {
@@ -186,13 +185,13 @@ private:
     TRef<ISoundEngine> m_pSoundEngine;
     LoaderImpl m_loader;
     PathFinder m_pathFinder;
-    UiScreenConfiguration* m_pConfiguration;
+    std::shared_ptr<UiScreenConfiguration> m_pConfiguration;
 
     sol::state m_lua;
 
 public:
 
-    LuaScriptContextImpl(Engine* pEngine, ISoundEngine* pSoundEngine, std::string stringArtPath, UiScreenConfiguration* pConfiguration) :
+    LuaScriptContextImpl(Engine* pEngine, ISoundEngine* pSoundEngine, std::string stringArtPath, const std::shared_ptr<UiScreenConfiguration>& pConfiguration) :
         m_pEngine(pEngine),
         m_pSoundEngine(pSoundEngine),
         m_pConfiguration(pConfiguration),
@@ -265,7 +264,7 @@ public:
     //
     //}
 
-    TRef<Image> InnerLoadImageFromLua(UiScreenConfiguration* screenConfiguration) {
+    TRef<Image> InnerLoadImageFromLua(const std::shared_ptr<UiScreenConfiguration>& screenConfiguration) {
         std::unique_ptr<LuaScriptContextImpl> pContext = std::make_unique<LuaScriptContextImpl>(m_pEngine, m_pSoundEngine, m_stringArtPath, screenConfiguration);
 
         Executor executor = Executor();
@@ -292,12 +291,12 @@ public:
     class ImageReloadSink : public IEventSink, public WrapImage {
 
         TRef<UiEngineImpl> m_pUiEngine;
-        UiScreenConfiguration* m_pConfiguration;
+        std::shared_ptr<UiScreenConfiguration> m_pConfiguration;
 
         TRef<IEventSink> m_pSinkDelegate;
 
     public:
-        ImageReloadSink(UiEngineImpl* pUiEngine, UiScreenConfiguration* screenConfiguration) :
+        ImageReloadSink(UiEngineImpl* pUiEngine, const std::shared_ptr<UiScreenConfiguration>& screenConfiguration) :
             m_pUiEngine(pUiEngine),
             m_pConfiguration(screenConfiguration),
             WrapImage(pUiEngine->InnerLoadImageFromLua(screenConfiguration))
@@ -324,7 +323,7 @@ public:
 
     };
 
-    TRef<Image> LoadImageFromLua(UiScreenConfiguration* screenConfiguration) {
+    TRef<Image> LoadImageFromLua(const std::shared_ptr<UiScreenConfiguration>& screenConfiguration) {
         auto path = screenConfiguration->GetPath();
 
         ImageReloadSink* result = new ImageReloadSink(this, screenConfiguration);

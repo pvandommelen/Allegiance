@@ -5,7 +5,7 @@ public:
     virtual std::string GetPath() = 0;
     virtual IEventSink& GetEventSink(std::string) = 0;
 
-    static UiScreenConfiguration* Create(std::string path, std::map<std::string, std::function<void()>> event_listeners);
+    static std::shared_ptr<UiScreenConfiguration> Create(std::string path, std::map<std::string, std::function<void()>> event_listeners);
 }; 
 
 class UiEngine : public IObject
@@ -22,7 +22,7 @@ public:
     static UiEngine* UiEngine::Create(Engine* pEngine, ISoundEngine* pSoundEngine);
 
     //virtual Image* LoadImage(std::string path) = 0;
-    virtual TRef<Image> LoadImageFromLua(UiScreenConfiguration* screenConfiguration) = 0;
+    virtual TRef<Image> LoadImageFromLua(const std::shared_ptr<UiScreenConfiguration>& screenConfiguration) = 0;
 
     virtual void TriggerReload() = 0;
 };

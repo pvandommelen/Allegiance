@@ -13,7 +13,7 @@ public:
         sol::table table = m_pLua->create_table();
 
         table["Create"] = [](std::string name, int size) {
-            return new FontValue(
+            return (TRef<FontValue>)new FontValue(
                 CreateEngineFont(
                     CreateFont(
                     (int)size,

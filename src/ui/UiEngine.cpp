@@ -294,16 +294,23 @@ public:
         TRef<UiEngineImpl> m_pUiEngine;
         UiScreenConfiguration* m_pConfiguration;
 
+        TRef<IEventSink> m_pSinkDelegate;
+
     public:
         ImageReloadSink(UiEngineImpl* pUiEngine, UiScreenConfiguration* screenConfiguration) :
             m_pUiEngine(pUiEngine),
             m_pConfiguration(screenConfiguration),
             WrapImage(pUiEngine->InnerLoadImageFromLua(screenConfiguration))
         {
+            m_pSinkDelegate = IEventSink::CreateDelegate(this);
         }
 
         ~ImageReloadSink() {
-            m_pUiEngine->m_pReloadEventSource->RemoveSink(this);
+            m_pUiEngine->m_pReloadEventSource->RemoveSink(m_pSinkDelegate);
+        }
+
+        IEventSink* GetSinkDelegate() {
+            return m_pSinkDelegate;
         }
 
         bool OnEvent(IEventSource* pevent) {
@@ -311,16 +318,17 @@ public:
             return true;
         }
 
+        void Render(Context* pContext) override {
+            WrapImage::Render(pContext);
+        }
+
     };
 
     TRef<Image> LoadImageFromLua(UiScreenConfiguration* screenConfiguration) {
-        //TRef<Image> inner = InnerLoadImageFromLua(path);
-        //TRef<Image> wrapper = new WrapImage(inner);
-
         auto path = screenConfiguration->GetPath();
 
         ImageReloadSink* result = new ImageReloadSink(this, screenConfiguration);
-        m_pReloadEventSource->AddSink(result);
+        m_pReloadEventSource->AddSink(result->GetSinkDelegate());
         return result;
     }
 };

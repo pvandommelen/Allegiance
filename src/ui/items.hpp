@@ -105,7 +105,7 @@ public:
 };
 
 template<typename A>
-TStaticValue<A>* wrapValue(sol::object a) {
+TRef<TStaticValue<A>> wrapValue(sol::object a) {
     TStaticValue<A>* converted_a;
     if (a.is<A>()) {
         converted_a = new TStaticValue<A>(a.as<A>());
@@ -117,5 +117,6 @@ TStaticValue<A>* wrapValue(sol::object a) {
         // force a cast, this sometimes still works, exception otherwise
         converted_a = new TStaticValue<A>(a.as<A>());
     }
-    return converted_a;
+    TRef<TStaticValue<A>> refcounted = converted_a;
+    return refcounted;
 };

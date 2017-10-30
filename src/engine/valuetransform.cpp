@@ -266,3 +266,18 @@ TRef<Number> PointTransform::X(PointValue* ppoint) {
 TRef<Number> PointTransform::Y(PointValue* ppoint) {
     return new PointY(ppoint);
 };
+
+
+// ### Color
+
+TRef<ColorValue> ColorTransform::Create(Number* r, Number* g, Number* b, Number* a) {
+    return new TransformedValue4<Color, float, float, float, float>(
+        [](float r, float g, float b, float a) {
+            return Color(r, g, b, a);
+        },
+        r,
+        g,
+        b,
+        a
+    );
+};

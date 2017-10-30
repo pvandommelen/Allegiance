@@ -26,6 +26,11 @@ public:
     static TRef<Number> Y(PointValue* point);
 };
 
+class ColorTransform {
+public:
+    static TRef<ColorValue> Create(Number* r, Number* g, Number* b, Number* a);
+};
+
 template<class TransformedType, class OriginalType>
 class TransformedValue : public TStaticValue<TransformedType> {
 
@@ -74,6 +79,30 @@ public:
         OriginalType2 value2 = ((TStaticValue<OriginalType2>*)GetChild(1))->GetValue();
 
         TransformedType evaluated = GetEvaluatedValue(value, value2);
+
+        GetValueInternal() = evaluated;
+    }
+};
+
+template<class TransformedType, class OriginalType, class OriginalType2, class OriginalType3, class OriginalType4>
+class TransformedValue4 : public TStaticValue<TransformedType> {
+    typedef std::function<TransformedType(OriginalType, OriginalType2, OriginalType3, OriginalType4)> CallbackType;
+    CallbackType m_callback;
+
+public:
+    TransformedValue4(CallbackType callback, TStaticValue<OriginalType>* value, TStaticValue<OriginalType2>* value2, TStaticValue<OriginalType3>* value3, TStaticValue<OriginalType4>* value4) :
+        m_callback(callback),
+        TStaticValue(value, value2, value3, value4)
+    {}
+
+    void Evaluate()
+    {
+        OriginalType value = ((TStaticValue<OriginalType>*)GetChild(0))->GetValue();
+        OriginalType2 value2 = ((TStaticValue<OriginalType2>*)GetChild(1))->GetValue();
+        OriginalType3 value3 = ((TStaticValue<OriginalType3>*)GetChild(2))->GetValue();
+        OriginalType4 value4 = ((TStaticValue<OriginalType4>*)GetChild(3))->GetValue();
+
+        TransformedType evaluated = m_callback(value, value2, value3, value4);
 
         GetValueInternal() = evaluated;
     }

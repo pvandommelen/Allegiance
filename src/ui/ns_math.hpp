@@ -22,24 +22,36 @@ public:
             return new Number(a);
         };
 
-        table["Add2"] = sol::overload(
-            [](Number* a, Number* b) {
-                return (Number*)new TransformedValue2<float, float, float>([](float a, float b) {
-                    return a + b;
-                }, a, b);
-            }
-        );
-
-        table["Add"] = createAutoWrappingFunction<float, float, float>([](float a, float b) {
-            return a + b;
-        });
-
-        table["Divide"] = [](sol::object a, sol::object b) {
-            return (Number*)new TransformedValue2<float, float, float>([](float a, float b) {
-                return a / b;
-            }, wrapValue<float>(a), wrapValue<float>(b));
+        table["Add"] = [](sol::object a, sol::object b) {
+            return NumberTransform::Add(wrapValue<float>(a), wrapValue<float>(b));
         };
-
+        table["Subtract"] = [](sol::object a, sol::object b) {
+            return NumberTransform::Subtract(wrapValue<float>(a), wrapValue<float>(b));
+        };
+        table["Multiply"] = [](sol::object a, sol::object b) {
+            return NumberTransform::Multiply(wrapValue<float>(a), wrapValue<float>(b));
+        };
+        table["Divide"] = [](sol::object a, sol::object b) {
+            return NumberTransform::Divide(wrapValue<float>(a), wrapValue<float>(b));
+        };
+        table["Mod"] = [](sol::object a, sol::object b) {
+            return NumberTransform::Mod(wrapValue<float>(a), wrapValue<float>(b));
+        };
+        table["Min"] = [](sol::object a, sol::object b) {
+            return NumberTransform::Min(wrapValue<float>(a), wrapValue<float>(b));
+        };
+        table["Max"] = [](sol::object a, sol::object b) {
+            return NumberTransform::Max(wrapValue<float>(a), wrapValue<float>(b));
+        };
+        table["Round"] = [](sol::object a, int decimals) {
+            return NumberTransform::Round(wrapValue<float>(a), decimals);
+        };
+        table["Sin"] = [](sol::object a) {
+            return NumberTransform::Sin(wrapValue<float>(a));
+        };
+        table["Cos"] = [](sol::object a) {
+            return NumberTransform::Cos(wrapValue<float>(a));
+        };
         m_pLua->new_usertype<Number>("Number");
 
         m_pLua->set("Number", table);

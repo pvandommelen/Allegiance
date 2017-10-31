@@ -132,6 +132,7 @@
     <ClCompile Include="..\src\engine\HashTable.cpp" />
     <ClCompile Include="..\src\engine\image.cpp" />
     <ClCompile Include="..\src\engine\ImageTransfer.cpp" />
+    <ClCompile Include="..\src\engine\imagetransform.cpp" />
     <ClCompile Include="..\src\engine\keyframe.cpp" />
     <ClCompile Include="..\src\engine\LogFile.cpp" />
     <ClCompile Include="..\src\engine\material.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="..\src\engine\HashTable.h" />
     <ClInclude Include="..\src\engine\image.h" />
     <ClInclude Include="..\src\engine\ImageTransfer.h" />
+    <ClInclude Include="..\src\engine\imagetransform.h" />
     <ClInclude Include="..\src\engine\inputengine.h" />
     <ClInclude Include="..\src\engine\keyframe.h" />
     <ClInclude Include="..\src\engine\LogFile.h" />

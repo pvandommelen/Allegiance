@@ -251,6 +251,8 @@ class JustifyCenter        : public Justification { public: JustifyCenter       
 #include "bspgeo.h"
 #include "image.h"
 
+#include "imagetransform.h"
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // Panes

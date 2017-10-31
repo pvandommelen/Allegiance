@@ -124,22 +124,6 @@ public:
     {}
 };
 
-class ImageSize : public PointValue {
-private:
-    Image* GetImage() { return Image::Cast(GetChild(0)); }
-
-public:
-    ImageSize(Image* pimage) :
-        PointValue(pimage)
-    {
-    }
-
-    void Evaluate()
-    {
-        GetValueInternal() = Point::Cast(GetImage()->GetBounds().GetRect().Size());
-    }
-};
-
 class ImageNamespace {
 public:
     static void AddNamespace(LuaScriptContext& context) {
@@ -203,80 +187,35 @@ public:
             return CreateStringImage(JustifyLeft(), font->GetValue(), color, width, new StringValue(ZString(string.c_str())));
         };
         table["Translate"] = [](Image* pimage, PointValue* pPoint) {
-            //bit of a hack. The inner function only gets called in the next event loop. This keeps a reference around. I assume this gets cleaned up correctly.
-            TRef<Image> imageRefKeeping = pimage;
-            return (TRef<Image>)new CallbackEvaluateImage<Point>(pPoint, [imageRefKeeping](Point point) {
-                return (TRef<Image>)new TranslateImage(
-                    imageRefKeeping,
-                    point
-                );
-            });
+            return ImageTransform::Translate(pimage, pPoint);
+        };
+        table["Scale"] = [](Image* pimage, PointValue* pPoint) {
+            return ImageTransform::Scale(pimage, pPoint);
+        };
+        table["Size"] = [](Image* pimage) {
+            return ImageTransform::Size(pimage);
         };
 
         sol::table tableJustification = context.GetLua().create_table();
         tableJustification["Left"] = (Justification)JustifyLeft();
         tableJustification["Right"] = (Justification)JustifyRight();
-        tableJustification["XCenter"] = (Justification)JustifyXCenter();
         tableJustification["Top"] = (Justification)JustifyTop();
         tableJustification["Bottom"] = (Justification)JustifyBottom();
-        tableJustification["YCenter"] = (Justification)JustifyYCenter();
         tableJustification["Center"] = (Justification)JustifyCenter();
+        tableJustification["Topleft"] = (Justification)(JustifyTop() | JustifyLeft());
+        tableJustification["Topright"] = (Justification)(JustifyTop() | JustifyRight());
+        tableJustification["Bottomleft"] = (Justification)(JustifyBottom() | JustifyLeft());
+        tableJustification["Bottomright"] = (Justification)(JustifyBottom() | JustifyRight());
         table["Justification"] = tableJustification;
 
-        table["ScaleFit"] = [](Image* pimage, PointValue* pPoint, Justification justification) {
-            //this should maybe be redone to return a custom class instead of using so many wrappers, it's a cool example though
-
-            TRef<ImageSize> sizeImage = new ImageSize(pimage);
-            TRef<Number> pImageX = PointTransform::X(sizeImage);
-            TRef<Number> pImageY = PointTransform::Y(sizeImage);
-
-            TRef<Number> pContainerX = PointTransform::X(pPoint);
-            TRef<Number> pContainerY = PointTransform::Y(pPoint);
-
-            TRef<Number> pScale = NumberTransform::Min(
-                NumberTransform::Divide(pContainerX, pImageX),
-                NumberTransform::Divide(pContainerY, pImageY)
-            );
-
-            TRef<Number> pSpaceX = NumberTransform::Subtract(pContainerX, NumberTransform::Multiply(pScale, pImageX));
-            TRef<Number> pSpaceY = NumberTransform::Subtract(pContainerY, NumberTransform::Multiply(pScale, pImageY));
-
-            TRef<Number> pNumberZero = new Number(0.0f);
-            TRef<Number> pNumberHalf = new Number(0.5f);
-
-            TRef<Number> pOffsetX;
-            TRef<Number> pOffsetY;
-
-            if (justification.Test(JustifyLeft())) {
-                pOffsetX = pNumberZero;
-            }
-            else if (justification.Test(JustifyRight())) {
-                pOffsetX = pSpaceX;
-            }
-            else {
-                pOffsetX = NumberTransform::Multiply(pNumberHalf, pSpaceX);
-            }
-
-            if (justification.Test(JustifyTop())) {
-                pOffsetY = pSpaceY;
-            }
-            else if (justification.Test(JustifyBottom())) {
-                pOffsetY = pNumberZero;
-            }
-            else {
-                pOffsetY = NumberTransform::Multiply(pNumberHalf, pSpaceY);
-            }
-
-            TRef<PointValue> pPointTranslate = PointTransform::Create(pOffsetX, pOffsetY);
-            TRef<PointValue> pPointScale = PointTransform::Create(pScale, pScale);
-
-            return (TRef<Image>)new TransformImage(
-                new TransformImage(
-                    pimage,
-                    new ScaleTransform2(pPointScale)
-                ),
-                new TranslateTransform2(pPointTranslate)
-            );
+        table["Justify"] = [](Image* pimage, PointValue* pSizeContainer, Justification justification) {
+            return ImageTransform::Justify(pimage, pSizeContainer, justification);
+        };
+        table["ScaleFit"] = [](Image* pimage, PointValue* pSizeContainer, Justification justification) {
+            return ImageTransform::ScaleFit(pimage, pSizeContainer, justification);
+        };
+        table["ScaleFill"] = [](Image* pimage, PointValue* pSizeContainer, Justification justification) {
+            return ImageTransform::ScaleFill(pimage, pSizeContainer, justification);
         };
 
         context.GetLua().set("Image", table);

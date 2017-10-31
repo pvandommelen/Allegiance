@@ -193,22 +193,6 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////
 
-class ImageSize : public PointValue {
-private:
-    Image* GetImage() { return Image::Cast(GetChild(0)); }
-
-public:
-    ImageSize(Image* pimage) :
-        PointValue(pimage)
-    {
-    }
-
-    void Evaluate()
-    {
-        GetValueInternal() = Point::Cast(GetImage()->GetBounds().GetRect().Size());
-    }
-};
-
 class ImageSizeFactory : public IFunction {
 private:
 public:
@@ -216,7 +200,7 @@ public:
     {
         TRef<Image> pimage = Image::Cast((Value*)(IObject*)stack.Pop());
 
-        return new ImageSize(pimage);
+        return ImageTransform::Size(pimage);
     }
 };
 
@@ -1014,11 +998,7 @@ public:
         TRef<Image>      pimage =      Image::Cast((Value*)(IObject*)stack.Pop());
         TRef<PointValue> ppoint = PointValue::Cast(        (IObject*)stack.Pop());
 
-        return
-           (Value*)new TransformImage(
-                pimage,
-                new TranslateTransform2(ppoint)
-           );
+        return (Value*)ImageTransform::Translate(pimage, ppoint);
     }
 };
 
@@ -1052,11 +1032,7 @@ public:
         TRef<Image>      pimage =      Image::Cast((Value*)(IObject*)stack.Pop());
         TRef<PointValue> ppoint = PointValue::Cast(        (IObject*)stack.Pop());
 
-        return 
-            (Value*)new TransformImage(
-                pimage, 
-                new ScaleTransform2(ppoint)
-            );
+        return (Value*)ImageTransform::Scale(pimage, ppoint);
     }
 };
 

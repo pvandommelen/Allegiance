@@ -51,7 +51,7 @@ public:
         
 
         tableEvent["ToBoolean"] = [](IEventSource* pEnableSource, IEventSource* pDisableSource) {
-            return (ModifiableBoolean*)new EventToBoolean(pEnableSource, pDisableSource);
+            return (Boolean*)new EventToBoolean(pEnableSource, pDisableSource);
         };
 
         m_pLua->set("Event", tableEvent);

@@ -17,6 +17,28 @@ public:
     }
 };
 
+template<class OriginalType>
+class CallbackImage : public WrapImage {
+    typedef std::function<TRef<Image>(OriginalType)> CallbackType;
+
+    CallbackType m_callback;
+
+public:
+    CallbackImage(CallbackType callback, TStaticValue<OriginalType>* pvalue1) :
+        m_callback(callback),
+        WrapImage(Image::GetEmpty(), pvalue1)
+    {}
+
+    void Evaluate()
+    {
+        OriginalType value1 = ((TStaticValue<OriginalType>*)GetChild(1))->GetValue();
+
+        TRef<Image> evaluated = m_callback(value1);
+
+        SetImage(evaluated);
+    }
+};
+
 TRef<Image> ImageTransform::Translate(Image* pImage, PointValue* pPoint) {
     return new TransformImage(
         pImage,
@@ -134,4 +156,34 @@ TRef<Image> ImageTransform::ScaleFill(Image* pimage, PointValue* pSizeContainer,
         pSizeContainer,
         justification
     );
+}
+
+TRef<Image> ImageTransform::Switch(Boolean* pValue, std::map<bool, TRef<Image>> mapOptions) {
+    return new CallbackImage<bool>([mapOptions](bool value) {
+        auto find = mapOptions.find(value);
+        if (find == mapOptions.end()) {
+            return (TRef<Image>)Image::GetEmpty();
+        }
+        return find->second;
+    }, pValue);
+}
+
+TRef<Image> ImageTransform::Switch(Number* pValue, std::map<int, TRef<Image>> mapOptions) {
+    return new CallbackImage<float>([mapOptions](float value) {
+        auto find = mapOptions.find((int)value); //convert to integer
+        if (find == mapOptions.end()) {
+            return (TRef<Image>)Image::GetEmpty();
+        }
+        return find->second;
+    }, pValue);
+}
+
+TRef<Image> ImageTransform::Switch(TStaticValue<ZString>* pValue, std::map<std::string, TRef<Image>> mapOptions) {
+    return new CallbackImage<ZString>([mapOptions](ZString value) {
+        auto find = mapOptions.find(std::string(value));
+        if (find == mapOptions.end()) {
+            return (TRef<Image>)Image::GetEmpty();
+        }
+        return find->second;
+    }, pValue);
 }

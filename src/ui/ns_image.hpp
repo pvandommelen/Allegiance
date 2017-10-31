@@ -57,73 +57,6 @@ TRef<Image> LoadImageFile(LuaScriptContext& context, std::string path) {
     }
 }
 
-template<class A>
-class EvaluateImage : public WrapImage {
-
-private:
-
-
-protected:
-    virtual TRef<Image> GetEvaluatedImage(A bValue) = 0;
-
-public:
-
-    EvaluateImage(TStaticValue<A>* pvalue1) :
-        WrapImage(Image::GetEmpty(), pvalue1)
-    {
-
-    }
-
-    void Evaluate()
-    {
-        A value = ((TStaticValue<A>*)GetChild(1))->GetValue();
-
-        TRef<Image> evaluated = GetEvaluatedImage(value);
-
-        ZAssert(evaluated != NULL);
-
-        SetImage(evaluated);
-    }
-
-};
-
-template<class A>
-class CallbackEvaluateImage : public EvaluateImage<A> {
-
-    std::function<TRef<Image>(A)> m_callback;
-
-protected:
-    TRef<Image> GetEvaluatedImage(A value) {
-        return m_callback(value);
-    }
-
-public:
-    CallbackEvaluateImage(TStaticValue<A>* value, std::function<TRef<Image>(A)> callback) :
-        EvaluateImage(value),
-        m_callback(callback)
-    {}
-};
-
-class BoolSwitchImage : public EvaluateImage<bool> {
-
-    std::map<bool, TRef<Image>> m_options;
-
-protected:
-    TRef<Image> GetEvaluatedImage(bool bValue) {
-        auto find = m_options.find(bValue);
-        if (find == m_options.end()) {
-            return Image::GetEmpty();
-        }
-        return find->second;
-    }
-
-public:
-    BoolSwitchImage(TStaticValue<bool>* value, std::map<bool, TRef<Image>> options) :
-        EvaluateImage(value),
-        m_options(options)
-    {}
-};
-
 class ImageNamespace {
 public:
     static void AddNamespace(LuaScriptContext& context) {
@@ -168,7 +101,36 @@ public:
         };
         table["Switch"] = [](sol::object value, sol::table table) {
             int count = table.size();
-            if (value.is<ModifiableBoolean*>() || value.is<ModifiableNumber*>() || value.is<ModifiableString*>()) {
+
+            if (value.is<TStaticValue<ZString>>() || value.is<std::string>()) {
+                //the wrapped value is a ZString, the unwrapped value a std::string
+                std::map<std::string, TRef<Image>> mapOptions;
+
+                table.for_each([&mapOptions](sol::object key, sol::object value) {
+                    std::string strKey = key.as<std::string>();
+                    mapOptions[strKey] = value.as<Image*>();
+                });
+
+                if (value.is<std::string>()) {
+                    return ImageTransform::Switch(
+                        (TRef<TStaticValue<ZString>>)new TStaticValue<ZString>(ZString(value.as<std::string>().c_str())),
+                        mapOptions
+                    );
+                }
+
+                return ImageTransform::Switch(wrapValue<ZString>(value), mapOptions);
+            }
+            else if (value.is<Number>() || value.is<float>()) {
+                std::map<int, TRef<Image>> mapOptions;
+
+                table.for_each([&mapOptions](sol::object key, sol::object value) {
+                    int fKey = (int)key.as<float>();
+                    mapOptions[fKey] = value.as<Image*>();
+                });
+
+                return ImageTransform::Switch(wrapValue<float>(value), mapOptions);
+            }
+            else if (value.is<Boolean>() || value.is<bool>()) {
                 std::map<bool, TRef<Image>> mapOptions;
 
                 table.for_each([&mapOptions](sol::object key, sol::object value) {
@@ -176,10 +138,7 @@ public:
                     mapOptions[bKey] = value.as<Image*>();
                 });
 
-                return (TRef<Image>)new BoolSwitchImage(value.as<ModifiableBoolean*>(), mapOptions);
-            }
-            else if (value.is<bool>() || value.is<int>() || value.is<std::string>()) {
-
+                return ImageTransform::Switch(wrapValue<bool>(value), mapOptions);
             }
             throw std::runtime_error("Expected value argument of Image.Switch to be either a wrapped or unwrapped bool, int, or string");
         };

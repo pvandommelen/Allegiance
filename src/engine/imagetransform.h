@@ -11,4 +11,8 @@ public:
     static TRef<Image> Justify(Image* pImage, PointValue* pContainer, Justification justification);
     static TRef<Image> ScaleFit(Image* pImage, PointValue* pContainer, Justification justification);
     static TRef<Image> ScaleFill(Image* pImage, PointValue* pContainer, Justification justification);
+
+    static TRef<Image> Switch(Boolean* pValue, std::map<bool, TRef<Image>> mapOptions);
+    static TRef<Image> Switch(Number* pValue, std::map<int, TRef<Image>> mapOptions);
+    static TRef<Image> Switch(TStaticValue<ZString>* pValue, std::map<std::string, TRef<Image>> mapOptions);
 };

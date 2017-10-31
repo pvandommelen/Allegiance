@@ -314,6 +314,7 @@ void EngineWindow::OnClose()
 // 
 bool g_bMDLLog    = false;
 bool g_bWindowLog = false;
+bool g_bLuaDebug = false;
 
 void EngineWindow::ParseCommandLine(const ZString& strCommandLine, bool& bStartFullscreen)
 {
@@ -332,7 +333,9 @@ void EngineWindow::ParseCommandLine(const ZString& strCommandLine, bool& bStartF
                 bStartFullscreen = false;
             } else if (str == "fullscreen") {
                 bStartFullscreen = true;
-			}
+            } else if (str == "lua-debug") {
+                g_bLuaDebug = true;
+            }
         } else {
             token.IsString(str);
         }

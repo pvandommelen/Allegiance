@@ -25,7 +25,7 @@ public:
 
 TRef<Screen> CreateTeamScreen(Modeler* pmodeler);
 TRef<Screen> CreateGameScreen(Modeler* pmodeler);
-TRef<Screen> CreateIntroScreen(Modeler* pmodeler, UiEngine& uiEngine);
+TRef<Screen> CreateIntroScreen(Modeler* pmodeler, UiEngine& uiEngine, bool bUseOldUi);
 TRef<Screen> CreateNewGameScreen(Modeler* pmodeler);
 TRef<Screen> CreateGameOverScreen(Modeler* pmodeler);
 TRef<Screen> CreateLeaderBoardScreen(Modeler* pmodeler, ZString strCharacter);

@@ -1340,6 +1340,7 @@ public:
     TRef<IMenuItem>            m_pitemToggleDebris;
     TRef<IMenuItem>            m_pitemToggleStars;
     TRef<IMenuItem>            m_pitemToggleEnvironment;
+    TRef<IMenuItem>			   m_pitemToggleUseOldUi;
 	TRef<IMenuItem>			   m_pitemToggleHighResTextures; // BT - 10/17 - HighRes Textures
     TRef<IMenuItem>            m_pitemToggleRoundRadar;
     TRef<IMenuItem>            m_pitemToggleLinearControls;
@@ -1446,6 +1447,8 @@ public:
 
     DWORD m_cVTVersion;
     HWND  m_hwndVTEdit;
+
+    bool m_bUseOldUi;
 
 	// BT - 10/17 - HighRes Textures
 	bool m_bUseHighResTextures;
@@ -2341,7 +2344,7 @@ public:
                     break;
 
                 case ScreenIDIntroScreen:
-					SetUiScreen(CreateIntroScreen(GetModeler(), *m_pUiEngine));
+					SetUiScreen(CreateIntroScreen(GetModeler(), *m_pUiEngine, m_bUseOldUi));
                     break;
 
 				case ScreenIDSplashScreen:
@@ -2418,7 +2421,7 @@ public:
 							}
 						}
 						GetWindow()->screen(ScreenIDIntroScreen);
-						SetUiScreen(CreateIntroScreen(GetModeler(), *m_pUiEngine));
+						SetUiScreen(CreateIntroScreen(GetModeler(), *m_pUiEngine, m_bUseOldUi));
 	                    break;
 					}
 
@@ -2715,8 +2718,8 @@ public:
 		m_iMouseAccel(0), //#215
 		m_bShowInventoryPane(true), // BT - 10/17 - Map and Sector Panes are now shown on launch and remember the pilots settings on last dock. 
 		m_bShowSectorMapPane(true),  // BT - 10/17 - Map and Sector Panes are now shown on launch and remember the pilots settings on last dock. 
-		m_bUseHighResTextures(true) // BT - 10/17 - HighRes Textures
-
+		m_bUseHighResTextures(true), // BT - 10/17 - HighRes Textures
+        m_bUseOldUi(false)
     {
         HRESULT hr;
 
@@ -3000,6 +3003,8 @@ public:
 		m_bUseHighResTextures    = (LoadPreference("HighResTextures",		1) != 0);
 
 		m_pmodeler->SetHighResTextures(m_bUseHighResTextures);
+
+        m_bUseOldUi = (LoadPreference("OldUi", 1) != 0);
 
         //
         // Initial screen size
@@ -3329,7 +3334,7 @@ public:
         //
         // intro.avi video moved up
         //
-		TRef<Screen> introscr = CreateIntroScreen(GetModeler(), *m_pUiEngine);
+		TRef<Screen> introscr = CreateIntroScreen(GetModeler(), *m_pUiEngine, m_bUseOldUi);
 		SetUiScreen(introscr);
         m_screen = ScreenIDIntroScreen;
         RestoreCursor();
@@ -4127,6 +4132,8 @@ public:
 
 	#define idmHighResTextures	822	// BT - 10/17 - HighRes Textures
 
+    #define idmOldUi	        823
+
 	// BT - STEAM
 	#define idmCallsignTag0		900
 	#define idmCallsignTag1		901
@@ -4637,6 +4644,8 @@ public:
 				
 				// BT - 10/17 - HighRes Textures
 				m_pitemToggleHighResTextures	   = pmenu->AddMenuItem(idmHighResTextures,				GetHighResTexturesString(),				'X');
+
+                m_pitemToggleUseOldUi     = pmenu->AddMenuItem(idmOldUi, GetOldUiMenuString(), 'G');
  				
 				break;
 
@@ -5387,6 +5396,21 @@ public:
         }
     }
 
+    void ToggleOldUi()
+    {
+        m_bUseOldUi = !m_bUseOldUi;
+
+        SavePreference("OldUi", m_bUseOldUi);
+
+        if (m_pitemToggleUseOldUi != NULL) {
+            m_pitemToggleUseOldUi->SetString(GetOldUiMenuString());
+        }
+
+        m_pmessageBox = CreateMessageBox("Enabling or Disabling the old UI will require you to restart Allegiance.", NULL, true, false);
+        GetWindow()->GetPopupContainer()->OpenPopup(m_pmessageBox, false);
+
+    }
+
 	// BT - 10/17 - HighRes Textures
 	void ToggleHighResTextures()
 	{
@@ -6063,6 +6087,11 @@ public:
         return (m_bFlipY ? "Y Axis Flipped " : "Y Axis Not Flipped ");
     }
 
+    ZString GetOldUiMenuString()
+    {
+        return "Use old UI: " + ZString(m_bUseOldUi ? "On" : "Off");
+    }
+
 	// BT - 10/17 - HighRes Textures
 	ZString GetHighResTexturesString()
 	{
@@ -6347,6 +6376,10 @@ public:
 			case idmHighResTextures:
 				ToggleHighResTextures();
 				break;
+
+            case idmOldUi:
+                ToggleOldUi();
+                break;
 
 
 			/* pkk May 6th: Disabled bandwidth patch

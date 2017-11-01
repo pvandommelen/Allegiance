@@ -1071,6 +1071,9 @@ private:
         }
     }
 
+    void SetFullscreenSize(const WinPoint& point) {
+        SetFullscreenSize(Vector(point.X(), point.Y(), g_DX9Settings.m_refreshrate));
+    }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Re-used full screen mode change functions

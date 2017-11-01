@@ -2187,7 +2187,7 @@ public:
 
 		target->SetImage(m_pimageScreen);
 		
-        //SetSizeable(true); // kg-: #226 always
+        SetSizeable(true); // kg-: #226 always
 
         //
         // keep a reference to the screen to keep it alive

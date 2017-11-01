@@ -492,7 +492,12 @@ void EngineWindow::UpdateWindowStyle()
         if ((GetSystemMetrics(SM_CXSCREEN) <= size.X() || GetSystemMetrics(SM_CYSCREEN) <= size.Y()))
         {
             //windowed, but we do not fit with the selected resolution, switch to borderless
+            //set to monitor resolution
+            m_pengine->SetFullscreenSize(WinPoint(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)));
+            size = m_pengine->GetFullscreenSize();
+            SetClientRect(WinRect(WinPoint(0, 0), size));
 
+            //set window properties
             SetHasMinimize(false);
             SetHasMaximize(false);
             SetHasSysMenu(false);
@@ -737,6 +742,7 @@ void EngineWindow::RectChanged()
                (size           != WinPoint(0, 0))
             && (m_pengine->GetFullscreenSize() != size          )
         ) {
+            SetFullscreenSize(Vector(size.X(), size.Y(), g_DX9Settings.m_refreshrate));
             Invalidate();
         }
 
@@ -777,23 +783,6 @@ WinPoint EngineWindow::GetWindowedSize()
 WinPoint EngineWindow::GetFullscreenSize()
 {
     return m_pengine->GetFullscreenSize();
-}
-
-void EngineWindow::SetWindowedSize(const WinPoint& size)
-{
-    if (g_bWindowLog) {
-        ZDebugOutput("EngineWindow::SetWindowedSize(" + GetString(size) + ")\n");
-    }
-
-    if (m_pengine->GetFullscreenSize() != size) {
-        if (!m_pengine->IsFullscreen()) {
-            Invalidate();
-        }
-    }
-
-    if (g_bWindowLog) {
-        ZDebugOutput("EngineWindow::SetWindowedSize() exiting\n");
-    }
 }
 
 void EngineWindow::Set3DAccelerationImportant(bool b3DAccelerationImportant)

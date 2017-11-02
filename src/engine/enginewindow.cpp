@@ -489,11 +489,18 @@ void EngineWindow::UpdateWindowStyle()
         SetClientRect(rect);
     } else {
         WinPoint size = m_pengine->GetFullscreenSize();
-        if ((GetSystemMetrics(SM_CXSCREEN) <= size.X() || GetSystemMetrics(SM_CYSCREEN) <= size.Y()))
+
+        // get the currently selected monitor's resolution
+        CD3DDevice9 * pDev = CD3DDevice9::Get();
+        RECT rectWindow = pDev->GetDeviceSetupParams()->monitorInfo.rcMonitor;
+        LONG screenWidth = rectWindow.right - rectWindow.left;
+        LONG screenHeight = rectWindow.bottom - rectWindow.top;
+
+        if (screenWidth <= size.X() || screenHeight <= size.Y())
         {
             //windowed, but we do not fit with the selected resolution, switch to borderless
             //set to monitor resolution
-            m_pengine->SetFullscreenSize(WinPoint(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)));
+            m_pengine->SetFullscreenSize(WinPoint(screenWidth, screenHeight));
             size = m_pengine->GetFullscreenSize();
             SetClientRect(WinRect(WinPoint(0, 0), size));
 

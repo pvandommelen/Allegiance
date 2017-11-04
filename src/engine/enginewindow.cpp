@@ -496,8 +496,7 @@ void EngineWindow::UpdateWindowStyle()
         LONG screenWidth = rectWindow.right - rectWindow.left;
         LONG screenHeight = rectWindow.bottom - rectWindow.top;
 
-        if (screenWidth <= size.X() || screenHeight <= size.Y())
-        {
+        if (screenWidth <= size.X() && screenHeight <= size.Y()) {
             //windowed, but we do not fit with the selected resolution, switch to borderless
             //set to monitor resolution
             m_pengine->SetFullscreenSize(WinPoint(screenWidth, screenHeight));

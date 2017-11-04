@@ -745,6 +745,7 @@ private:
 				ZDebugOutput("Invalid resolution\n");
 			}
 			//auto retry next mode untill end of list NYI
+            return false;
 		}
 
         if (g_bWindowLog) {
@@ -832,17 +833,16 @@ private:
             //
             // Didn't work goto to the next lower resolution
             //
+            Vector lower_resolution = PreviousMode(m_sizeResolution->GetValue());
 
-/*            WinPoint pointNew = pdddevice->PreviousMode(m_pointFullscreen);
-
-            if (pointNew == m_pointFullscreen) {
+            if (lower_resolution.X() == m_sizeResolution->GetValue().X() && lower_resolution.Y() == m_sizeResolution->GetValue().Y()) {
                 if (g_bWindowLog) {
                     ZDebugOutput("No more valid resolutions\n");
                 }
                 return false;
             }
 
-            m_pointFullscreen = pointNew;*/
+            SetFullscreenSize(lower_resolution);
         }
     }
 
@@ -1118,8 +1118,7 @@ private:
 
         for(int index = 0; index < count; index++) {
             if (
-                   m_modes[index].X() >= size.X() 
-                //&& m_modes[index].Y() >= size.Y() // Imago - look at X only due to widescreens 7/2/09
+                m_modes[index].X() == size.X() && m_modes[index].Y() == size.Y()
             ) {
                 m_modes.SetCount(index);
                 return;

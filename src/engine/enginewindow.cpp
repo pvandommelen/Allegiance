@@ -31,10 +31,12 @@ EngineWindow::ModeData EngineWindow::s_pmodes[] = //imago updated 6/29/09 NYI le
 		ModeData(WinPoint(1440, 900),  false),
 		ModeData(WinPoint(1600, 1200), false),
 		ModeData(WinPoint(1680, 1050), false),
-		ModeData(WinPoint(1920, 1080), false)
+		ModeData(WinPoint(1920, 1080), false),
+        ModeData(WinPoint(1920, 1200), false),
+        ModeData(WinPoint(2560, 1440), false)
     };
 
-int EngineWindow::s_countModes = 9;
+int EngineWindow::s_countModes = 11; //this is not the count, this number is the largest available index.
 
 //////////////////////////////////////////////////////////////////////////////
 //

@@ -190,6 +190,10 @@ public:
 				m_modes.PushEnd((Vector(width,height,rate))); //WSXGA+ (widescreen)
 			if (width == 1920 && height == 1080)
 				m_modes.PushEnd((Vector(width,height,rate))); //WUXGA (1080p widescreen mode)
+            if (width == 1920 && height == 1200)
+                m_modes.PushEnd((Vector(width, height, rate)));
+            if (width == 2560 && height == 1440)
+                m_modes.PushEnd((Vector(width, height, rate)));
 		}
 #pragma warning(default:4244)
     }

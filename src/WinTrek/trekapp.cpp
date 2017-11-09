@@ -3,8 +3,11 @@
 #include <malloc.h>
 
 // BT - STEAM
-#include "atlenc.h"
-#include <inttypes.h>
+#ifdef STEAM_APP_ID
+# include "atlenc.h"
+# include <inttypes.h>
+#endif
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -386,13 +389,15 @@ public:
     HRESULT Initialize(const ZString& strCommandLine)
     {
         _controlfp(_PC_53, _MCW_PC);
-
+#ifdef STEAM_APP_ID
 		// BT - STEAM
+#ifndef _DEBUG
 		if (IsDebuggerPresent() == false)
 		{
 			if (SteamAPI_RestartAppIfNecessary(STEAM_APP_ID) == true)
 				::exit(-1);
 		}
+#endif
 
 		bool steamInitResult = SteamAPI_Init();
 		if (steamInitResult == false)
@@ -401,7 +406,7 @@ public:
 			::MessageBoxA(NULL, "Steam Client is not running. Please launch Steam and try again.", "Error", MB_ICONERROR | MB_OK);
 			::exit(-1);
 		}
-
+#endif
         //
         // Make sure reloader finished correctly--this must be first before any other files are opened
         //

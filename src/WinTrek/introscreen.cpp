@@ -75,7 +75,8 @@ private:
         hoverCredits,
         hoverQuickstart,
         hoverExit,
-        hoverHelp
+        hoverHelp,
+        hoverDiscord
     };
 
     TRef<ModifiableNumber>  m_pnumberCurrentHover;
@@ -627,6 +628,7 @@ public:
         pnsIntroScreen->AddMember("hoverQuickstart", new Number(hoverQuickstart));
         pnsIntroScreen->AddMember("hoverExit", new Number(hoverExit));
         pnsIntroScreen->AddMember("hoverHelp", new Number(hoverHelp));
+        pnsIntroScreen->AddMember("hoverDiscord", new Number(hoverDiscord));
 
         pnsIntroScreen->AddMember("CurrentHover", m_pnumberCurrentHover = new ModifiableNumber(hoverNone));
 
@@ -689,6 +691,7 @@ public:
             //AddEventTarget(OnHoverQuickstart,   m_pbuttonQuickstart->GetMouseEnterEventSource());
             AddEventTarget(&IntroScreen::OnHoverExit, m_pbuttonExit->GetMouseEnterEventSource());
             AddEventTarget(&IntroScreen::OnHoverHelp, m_pbuttonHelp->GetMouseEnterEventSource());
+            AddEventTarget(&IntroScreen::OnHoverDiscord, m_pbuttonDiscord->GetMouseEnterEventSource());
 
             AddEventTarget(&IntroScreen::OnHoverNone, m_pbuttonPlayLan->GetMouseLeaveEventSource());
             AddEventTarget(&IntroScreen::OnHoverNone, m_pbuttonPlayInt->GetMouseLeaveEventSource());
@@ -1357,6 +1360,12 @@ public:
     bool OnHoverHelp()
     {
         m_pnumberCurrentHover->SetValue(hoverHelp);
+        return true;
+    }
+
+    bool OnHoverDiscord()
+    {
+        m_pnumberCurrentHover->SetValue(hoverDiscord);
         return true;
     }
 

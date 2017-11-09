@@ -9,7 +9,8 @@ CSteamAchievements::CSteamAchievements(CSteamID &steamID) :
 	m_gotRequestStatsResponse(false),
 	m_gotSuccessfulRequestStatsResponse(false),
 	m_gotStatsStoredResponse(false),
-	m_gotSuccessfulStatsStoredResponse(false)
+	m_gotSuccessfulStatsStoredResponse(false),
+    m_nanAchievementEarned(false)
 {
 	sprintf(m_szSteamID, "%" PRIu64, steamID.ConvertToUint64());
 
@@ -292,6 +293,11 @@ void CSteamAchievements::AwardIGCAchievements(AchievementMask am)
 		SetAchievement(EAchievements::FIRST_PROBE_KILL_1_9);
 	if ((am & c_achmProbeSpot) > 0)
 		SetAchievement(EAchievements::PROBE_SPOT_1_10);
+    if ((am & c_achmNewRepair) > 0 && !m_nanAchievementEarned)
+    {
+        SetAchievement(EAchievements::NANITE_REPAIR_1_11);
+        m_nanAchievementEarned = true; //I was concerned about potentially calling set achievement too much
+    }
 
 }
 
@@ -301,7 +307,7 @@ void CSteamAchievements::AwardRecoverTechAchievement()
 }
 
 
-void CSteamAchievements::AddUserStats(PlayerScoreObject*  ppso)
+void CSteamAchievements::AddUserStats(PlayerScoreObject*  ppso, IshipIGC * pIship)
 {
 	int tempStat;
 	bool getSucceed;
@@ -372,6 +378,12 @@ void CSteamAchievements::AddUserStats(PlayerScoreObject*  ppso)
 			SetStat(EStats::PLAYER_LOSS, tempStat + 1);
 	}
 
+	if (pIship->GetRepair() > 0.0)
+	{
+		getSucceed = GetStat(EStats::REPAIR_AMOUNT, &tempStat);
+		if (getSucceed)
+			SetStat(EStats::REPAIR_AMOUNT, tempStat + floor(pIship->GetRepair()));
+	}
 }
 
 static DWORD WINAPI UpdateLeaderboardThread(LPVOID pThreadParameter)

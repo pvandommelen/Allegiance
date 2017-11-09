@@ -12,10 +12,16 @@
  *-----------------------------------------------------------------------*/
 
 
-#include "pch.h"
+#include "FTPSession.h"
 
+#include <Windows.h>
+#include <WinInet.h>
+#include <cstdio>
+#include <cstdint>
 
+#include <algorithm>
 
+#include "zassert.h"
 
 
 template<class TInterfaceClass>
@@ -25,36 +31,36 @@ class CInternetSessionImpl :
 public:
 
     CInternetSessionImpl(IInternetSessionSink * pSink) : // pSink can be NULL
-      m_buffer(NULL),
-      m_hFile(NULL),
-      m_pszFileList(NULL),
-      m_pszFileListData(NULL),
+      m_buffer(nullptr),
+      m_hFile(nullptr),
+      m_pszFileList(nullptr),
+      m_pszFileListData(nullptr),
       m_nLastErrorCode(0),
       m_nLastErrorCodeInThread(0),
       m_cBytesRead(0),
       m_bAbortDownload(false),
-      m_hFTPSession(NULL),
-      m_hFileConnection(NULL),
+      m_hFTPSession(nullptr),
+      m_hFileConnection(nullptr),
       m_pUpdateSink(pSink) 
     {
       m_szLastError[0] = 0;
       m_szErrorInThread[0] = 0;
 
-      m_eventResumeDownload = CreateEvent(NULL, FALSE, FALSE, NULL);
-      m_eventKillDownload = CreateEvent(NULL, TRUE, FALSE, NULL);
-      m_eventProgress = CreateEvent(NULL, FALSE, FALSE, NULL);
-      m_eventDownloadTerminated = CreateEvent(NULL, TRUE, FALSE, NULL);
-      m_eventFileCompleted = CreateEvent(NULL, FALSE, FALSE, NULL);
+      m_eventResumeDownload = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+      m_eventKillDownload = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+      m_eventProgress = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+      m_eventDownloadTerminated = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+      m_eventFileCompleted = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
       debugf("Creating download thread.\n");
-      DWORD dum;
-      m_threadDownload = CreateThread(NULL, 0, DownloadThread, (void*)this, 0, &dum);
+      uint32_t dum;
+      m_threadDownload = CreateThread(nullptr, 0, LPTHREAD_START_ROUTINE(DownloadThread), (void*)this, 0, LPDWORD(&dum));
 
-      if (m_pUpdateSink && m_threadDownload == NULL)
+      if (m_pUpdateSink && m_threadDownload == nullptr)
           debugf("Failed to create thread.\n");
     }
 
-    virtual ~CInternetSessionImpl() 
+    ~CInternetSessionImpl() override
     {
         KillDownload();
         Disconnect();
@@ -116,7 +122,7 @@ public:
                 i++;
                 psz++;
             }
-            m_pszFileListData[i] = NULL;
+            m_pszFileListData[i] = nullptr;
             m_pszFileList = m_pszFileListData;
         }
 
@@ -131,8 +137,8 @@ public:
 
         m_nBufferSize = nMaxBufferSize;
 
-        if(m_buffer == NULL)
-            m_buffer = (char*)::VirtualAlloc(NULL, m_nBufferSize, MEM_COMMIT, PAGE_READWRITE);
+        if(m_buffer == nullptr)
+            m_buffer = (char*)::VirtualAlloc(nullptr, m_nBufferSize, MEM_COMMIT, PAGE_READWRITE);
 
         assert(m_buffer);
 
@@ -172,21 +178,21 @@ public:
         return true;
     }
 
-    const char* GetDownloadPath()
+    const char* GetDownloadPath() override
     {
         return m_szDestFolder;
     }
 
-    const char* GetLastErrorMessage() 
+    const char* GetLastErrorMessage() override
     {
         if (m_szLastError[0] != '\0')
         {
             return m_szLastError;
         }
-        else return NULL; // no error has occured
+        else return nullptr; // no error has occured
     }
 
-    void Abort(bool bAutoDisconnect) 
+    void Abort(bool bAutoDisconnect) override
     {
         KillDownload();
         m_bAbortDownload = true;
@@ -195,7 +201,7 @@ public:
     }
 
 
-    bool ContinueDownload()
+    bool ContinueDownload() override
     {
         if (m_szLastError[0] != '\0')  // if aborted or previous error
             return false;
@@ -216,7 +222,7 @@ public:
         }
 
         // Note: *m_pszFileList is 0xFFFFFFFF if download thread hasn't started downloading yet
-        if (*m_pszFileList != NULL && !m_bAbortDownload) // if not done
+        if (*m_pszFileList != nullptr && !m_bAbortDownload) // if not done
         {
             if (WaitForSingleObject(m_eventProgress, 0) == WAIT_OBJECT_0)
             {
@@ -273,7 +279,7 @@ protected:
         FILE_COMPLETED,
     };
 
-     static DWORD WINAPI DownloadThread(LPVOID pThreadParameter)
+     static uint32_t WINAPI DownloadThread(LPVOID pThreadParameter)
     {
 		debugf("DownloadThread(): thread started.\r\n");
 
@@ -289,7 +295,7 @@ protected:
         {
 			debugf("DownloadThread(): Checking for pSession->m_hFile: %ld\r\n", pSession->m_hFile);
 
-            if (pSession->m_hFile == NULL)
+            if (pSession->m_hFile == nullptr)
             {
 				debugf("DownloadThread(): pSession->m_hFile was null, calling start next file.\r\n");
 
@@ -303,7 +309,7 @@ protected:
 
 			debugf("DownloadThread(): checking pSession->m_hFile: %ld\r\n", pSession->m_hFile);
 
-            if (pSession->m_hFile != NULL) 
+            if (pSession->m_hFile != nullptr)
             {
 				debugf("DownloadThread(): pSession->m_hFile was not null, downloading file block.\r\n");
 
@@ -423,7 +429,7 @@ protected:
             return DOWNLOAD_ERROR;
         }
 
-//        cBytesAvail = std::min(cBytesAvail, nMaxBlockSize);
+//        cBytesAvail = min(cBytesAvail, nMaxBlockSize);
 
         if (cBytesAvail == 0)
         {
@@ -434,7 +440,7 @@ protected:
         //
         // Get the available data
         //
-        unsigned long cBytesAttempted = std::min(cBytesAvail, (unsigned long)m_nBufferSize-m_cBytesRead);
+        unsigned long cBytesAttempted = std::min(cBytesAvail, (unsigned long)(m_nBufferSize-m_cBytesRead));
 
         if (!InternetReadFile((void*)m_hFileConnection, (void*)(m_buffer+m_cBytesRead), cBytesAttempted, &cBytesJustRead))
         {
@@ -492,10 +498,10 @@ protected:
        m_hFile = CreateFile(szFilename, 
                                  GENERIC_WRITE, 
                                  FILE_SHARE_READ, 
-                                 NULL, 
+                                 nullptr,
                                  CREATE_ALWAYS, 
                                  FILE_ATTRIBUTE_TEMPORARY, // don't write to disk right away (for better performance).
-                                 NULL);
+                                 nullptr);
 
        if (m_hFile == INVALID_HANDLE_VALUE)
        {
@@ -542,13 +548,13 @@ protected:
 
     bool CloseDownloadFile(bool bCompleted)
     {
-       if (m_hFile == NULL)
+       if (m_hFile == nullptr)
            return true;
 
        if (!::CloseHandle(m_hFile))
            DoError("Failed to close file %s", *m_pszFileList);
 
-       m_hFile = NULL;
+       m_hFile = nullptr;
 
       //
       // If progress updates are wanted
@@ -575,19 +581,19 @@ protected:
      *    dwErrorCode: take a dwErrorCode and print what it means as text    
      * 
      */
-    void FormatErrorMessage(char *szBuffer, DWORD dwErrorCode)
+    void FormatErrorMessage(char *szBuffer, uint32_t dwErrorCode)
     {
 
       sprintf(szBuffer,"(%d) ", dwErrorCode);
 
       FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | 
                     FORMAT_MESSAGE_IGNORE_INSERTS, 
-                    NULL, 
+                    nullptr,
                     dwErrorCode, 
                     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), 
                     szBuffer + strlen(szBuffer),
                     128,
-                    NULL 
+                    nullptr
                     );
       strcat(m_szLastError, "   ");
       unsigned long dummy, size = sizeof(m_szLastError) - strlen(szBuffer) - 2;
@@ -654,7 +660,7 @@ protected:
                 TerminateThread(m_threadDownload, 0);
             }
             CloseHandle(m_threadDownload);
-            m_threadDownload = NULL;
+            m_threadDownload = nullptr;
         }
     }
 
@@ -708,11 +714,11 @@ public:
     {
     }
         
-    virtual ~CFTPSessionImpl()
+    ~CFTPSessionImpl() override
     {
     }
 
-    virtual bool ConnectToSite(const char * szFTPSite, const char * szDirectory, const char * szUsername, const char * szPassword) 
+    bool ConnectToSite(const char * szFTPSite, const char * szDirectory, const char * szUsername, const char * szPassword) override
     {
        m_szLastError[0] = '\0';
 
@@ -720,7 +726,7 @@ public:
                            "Microsoft Internet Explorer",   // agent
                             INTERNET_OPEN_TYPE_PROXY,       // access
                             "ftp-gw",                       // proxy server
-                            NULL,                           // defaults
+                            nullptr,                           // defaults
                             0);                             // synchronous
 
        //
@@ -735,9 +741,9 @@ public:
            szPassword,                      // Password, can be NULL
            INTERNET_SERVICE_FTP,            // Flag to use FTP services
            0,                               // Flags (see SDK docs)
-           (DWORD) this);                   // Context for this connection
+           (uint32_t) this);                   // Context for this connection
 
-        if(m_hFTPSession== NULL)
+        if(m_hFTPSession== nullptr)
         {
             DoError("Failed to log onto FTP site (%s) : ", szFTPSite);
             return false;
@@ -752,20 +758,20 @@ public:
         return true;
     }
 
-    virtual int GetFileListIncrement()
+    int GetFileListIncrement() override
     {
         return 1;
     }
 
-    virtual bool  InitiateDownload(const char * const * pszFileList, 
+    bool  InitiateDownload(const char * const * pszFileList,
                                    const char * szDestFolder, 
                                    bool bDisconnectWhenDone = true,
-                                   int nMaxBufferSize = 1024*1024)
+                                   int nMaxBufferSize = 1024*1024) override
     {
         bool bRet = CInternetSessionImpl<IFTPSession>::InitiateDownload(pszFileList, szDestFolder, false, nMaxBufferSize);
 
         // If progress updates are wanted
-        if(m_pUpdateSink && *pszFileList != NULL)
+        if(m_pUpdateSink && *pszFileList != nullptr)
             // Fire starting point
                 m_pUpdateSink->OnProgress(0, *(m_pszFileList+1), 0);
 
@@ -789,29 +795,29 @@ public:
        m_hInternetSession = ::InternetOpen(
                            "Microsoft Internet Explorer",   // agent
                             INTERNET_OPEN_TYPE_PRECONFIG, //INTERNET_OPEN_TYPE_PROXY,       // access
-                            NULL,//"ftp-gw",                       // proxy server
-                            NULL,                           // defaults
+                            nullptr,//"ftp-gw",                       // proxy server
+                            nullptr,                           // defaults
                             0);                             // synchronous  //Fix memory leak -Imago 8/2/09
 
-       if (m_hInternetSession == NULL)
+       if (m_hInternetSession == nullptr)
            DoError("Failed to initialize HTTP stuff.");
     }
 
-    virtual ~CHTTPSessionImpl() 
+    ~CHTTPSessionImpl() override
     {
     }
 
     bool ConstructionSuccess()
     {
-        return m_hInternetSession != NULL;
+        return m_hInternetSession != nullptr;
     }
 
-    virtual int GetFileListIncrement()
+    int GetFileListIncrement() override
     {
         return 2;
     }
 
-    virtual bool StartNextFile()
+    bool StartNextFile() override
     {
         m_cBytesRead = 0;
         m_cCurrentFileBytesRead = 0;
@@ -825,7 +831,7 @@ public:
             //
             // Open file for download
             //
-            while (!(m_hFileConnection = InternetOpenUrl(m_hInternetSession, *m_pszFileList, NULL, 0, INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE, 0))) //Fix memory leak -Imago 8/2/09
+            while (!(m_hFileConnection = InternetOpenUrl(m_hInternetSession, *m_pszFileList, nullptr, 0, INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE, 0))) //Fix memory leak -Imago 8/2/09
             {
                 cTries++;
                 debugf("Failed to open URL(%s) for download, try #%d\n", *m_pszFileList, cTries);
@@ -839,7 +845,7 @@ public:
 
             ++m_pszFileList;
 
-            if (*m_pszFileList == NULL) // todo, verify the memory is ours
+            if (*m_pszFileList == nullptr) // todo, verify the memory is ours
             {
                 DoErrorInThread("FileList has bad format");
                 return false;
@@ -851,13 +857,13 @@ public:
         return true;
     }
 
-    virtual bool  InitiateDownload(const char * const * pszFileList, 
+    bool  InitiateDownload(const char * const * pszFileList,
                                    const char * szDestFolder, 
-                                   int nMaxBufferSize = 1024*1024)
+                                   int nMaxBufferSize = 1024*1024) override
     {
         bool bRet = CInternetSessionImpl<IHTTPSession>::InitiateDownload(pszFileList, szDestFolder, false, nMaxBufferSize);
 
-        if(m_pUpdateSink && *(m_pszFileList+2) != NULL)
+        if(m_pUpdateSink && *(m_pszFileList+2) != nullptr)
             // Fire starting point
             m_pUpdateSink->OnProgress(0, *(m_pszFileList+2), 0);
 
@@ -876,7 +882,7 @@ IHTTPSession * CreateHTTPSession(IHTTPSessionSink * pUpdateSink /*= NULL*/)
     if (pNew && pNew->ConstructionSuccess())
         return pNew; 
     else
-        return NULL;
+        return nullptr;
 }
 
 IFTPSession * CreateFTPSession(IFTPSessionUpdateSink * pUpdateSink /*= NULL*/)

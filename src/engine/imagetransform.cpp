@@ -187,3 +187,7 @@ TRef<Image> ImageTransform::Switch(TStaticValue<ZString>* pValue, std::map<std::
         return find->second;
     }, pValue);
 }
+
+TRef<Image> ImageTransform::Clip(Image* pImage, RectValue* pRect) {
+    return CreateClipImage(pImage, pRect);
+};

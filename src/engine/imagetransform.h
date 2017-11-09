@@ -15,4 +15,6 @@ public:
     static TRef<Image> Switch(Boolean* pValue, std::map<bool, TRef<Image>> mapOptions);
     static TRef<Image> Switch(Number* pValue, std::map<int, TRef<Image>> mapOptions);
     static TRef<Image> Switch(TStaticValue<ZString>* pValue, std::map<std::string, TRef<Image>> mapOptions);
+
+    static TRef<Image> Clip(Image* pImage, RectValue* pRect);
 };

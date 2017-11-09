@@ -177,6 +177,10 @@ public:
             return ImageTransform::ScaleFill(pimage, pSizeContainer, justification);
         };
 
+        table["Clip"] = [](Image* pimage, RectValue* rect) {
+            return ImageTransform::Clip(pimage, rect);
+        };
+
         context.GetLua().set("Image", table);
     }
 };

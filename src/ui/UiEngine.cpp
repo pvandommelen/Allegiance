@@ -290,7 +290,7 @@ public:
 
     class ImageReloadSink : public IEventSink, public WrapImage {
 
-        TRef<UiEngineImpl> m_pUiEngine;
+        UiEngineImpl* m_pUiEngine;
         std::shared_ptr<UiScreenConfiguration> m_pConfiguration;
 
         TRef<IEventSink> m_pSinkDelegate;
@@ -332,12 +332,7 @@ public:
     }
 };
 
-
-TRef<UiEngine> g_pUiEngine;
 UiEngine* UiEngine::Create(Engine* pEngine, ISoundEngine*  pSoundEngine)
 {
-    if (!g_pUiEngine) {
-        g_pUiEngine = new UiEngineImpl(pEngine, pSoundEngine);
-    }
-    return g_pUiEngine;
+    return new UiEngineImpl(pEngine, pSoundEngine);
 }

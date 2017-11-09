@@ -3557,6 +3557,7 @@ public:
         m_mapAnimatedImages.SetEmpty();
 
         TerminateGameStateContainer();
+        m_pwrapImageTop->SetImage(Image::GetEmpty());
         m_pimageScreen     = NULL;
         m_pscreen          = NULL;
         SetCaption(NULL);
@@ -3600,8 +3601,9 @@ public:
         m_pqcmenuMain = NULL;
         m_psoundmutexSal->Reset();
         m_psoundmutexVO->Reset();
-        m_pSoundEngine = NULL;
 
+        m_pUiEngine = NULL;
+        m_pSoundEngine = NULL;
         m_ptrekInput = NULL;
     }
 

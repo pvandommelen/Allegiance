@@ -29,23 +29,47 @@ public:
     }
 };
 
+class CallbackSink : public IEventSink {
+private:
+    std::function<void()> m_funcCallback;
+
+public:
+    CallbackSink(std::function<void()> funcCallback) :
+        m_funcCallback(funcCallback)
+    {}
+
+    bool OnEvent(IEventSource* pevent) {
+        m_funcCallback();
+
+        return true;
+    }
+};
+
 class ScreenNamespace {
 public:
     static void AddNamespace(LuaScriptContext& context) {
         sol::table table = context.GetLua().create_table();
 
-        table["PlayOnEvent"] = [&context](std::string path, IEventSource* pEventSource) {
+        table["GetExternalEventSink"] = [&context](std::string path) {
+            IEventSink& sink = context.GetExternalEventSink(path);
+            return (TRef<IEventSink>)&sink;
+        };
+
+        table["CreatePlaySoundSink"] = [&context](std::string path) {
             TRef<ISoundTemplate> pTemplate;
 
             std::string full_path = context.FindPath(path);
 
             ZSucceeded(CreateWaveFileSoundTemplate(pTemplate, full_path.c_str()));
-            pEventSource->AddSink(new PlaySoundSink(context.GetSoundEngine(), pTemplate));
+            return (TRef<IEventSink>)new PlaySoundSink(context.GetSoundEngine(), pTemplate);
         };
 
-        table["DelegateEventToExternalSink"] = [&context](std::string path, IEventSource* pEventSource) {
-            IEventSink& sink = context.GetExternalEventSink(path);
-            pEventSource->AddSink(&sink);
+        table["CreateOpenWebsiteSink"] = [&context](std::string strWebsite) {
+            auto openWebsite = context.GetOpenWebsiteFunction();
+
+            return (TRef<IEventSink>)new CallbackSink([openWebsite, strWebsite]() {
+                openWebsite(strWebsite);
+            });
         };
         
         table["GetResolution"] = [&context]() {

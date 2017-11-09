@@ -2981,7 +2981,9 @@ public:
 
         InitializeSoundTemplates();
 
-        m_pUiEngine = UiEngine::Create(m_pengine, m_pSoundEngine);
+        m_pUiEngine = UiEngine::Create(m_pengine, m_pSoundEngine, [this](std::string strWebsite) {
+            this->ShowWebPage(strWebsite.c_str());
+        });
 
         //
         // Load the Quick Chat Info

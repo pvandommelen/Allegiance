@@ -41,19 +41,21 @@ public:
 class EventNamespace {
 public:
     static void AddNamespace(sol::state* m_pLua) {
-        sol::table tableEvent = m_pLua->create_table();
+        sol::table table = m_pLua->create_table();
 
-        tableEvent["Get"] = [](Image* image, std::string string) {
+        table["OnEvent"] = [](IEventSink* pEventSink, IEventSource* pEventSource) {
+            pEventSource->AddSink(pEventSink);
+        };
+
+        table["Get"] = [](Image* image, std::string string) {
             MouseEventImage* pMouseEventImage = (MouseEventImage*)(image);
             return pMouseEventImage->GetEventSource(string);
         };
 
-        
-
-        tableEvent["ToBoolean"] = [](IEventSource* pEnableSource, IEventSource* pDisableSource) {
+        table["ToBoolean"] = [](IEventSource* pEnableSource, IEventSource* pDisableSource) {
             return (Boolean*)new EventToBoolean(pEnableSource, pDisableSource);
         };
 
-        m_pLua->set("Event", tableEvent);
+        m_pLua->set("Event", table);
     }
 };

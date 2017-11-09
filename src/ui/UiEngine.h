@@ -19,7 +19,7 @@ public:
     static std::string m_stringLogPath;
 
     static void SetGlobalArtPath(std::string path);
-    static UiEngine* UiEngine::Create(Engine* pEngine, ISoundEngine* pSoundEngine);
+    static UiEngine* UiEngine::Create(Engine* pEngine, ISoundEngine* pSoundEngine, std::function<void(std::string)> funcOpenWebsite);
 
     //virtual Image* LoadImage(std::string path) = 0;
     virtual TRef<Image> LoadImageFromLua(const std::shared_ptr<UiScreenConfiguration>& screenConfiguration) = 0;
@@ -45,4 +45,6 @@ public:
     virtual ISoundEngine* GetSoundEngine() = 0;
 
     virtual IEventSink& GetExternalEventSink(std::string name) = 0;
+
+    virtual std::function<void(std::string)> GetOpenWebsiteFunction() = 0;
 };

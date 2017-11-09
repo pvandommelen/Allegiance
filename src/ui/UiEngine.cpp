@@ -55,22 +55,6 @@ public:
 
 };
 
-class CallbackSink : public IEventSink {
-private:
-    const std::function<void()> m_callback;
-
-public:
-    CallbackSink(const std::function<void()> callback) :
-        m_callback(callback)
-    {}
-
-    bool OnEvent(IEventSource* source) {
-        m_callback();
-        return true;
-    }
-
-};
-
 std::shared_ptr<UiScreenConfiguration> UiScreenConfiguration::Create(std::string path, std::map<std::string, std::function<void()>> event_listeners) {
     std::map<std::string, TRef<IEventSink>> sinks;
 
@@ -186,12 +170,13 @@ private:
     LoaderImpl m_loader;
     PathFinder m_pathFinder;
     std::shared_ptr<UiScreenConfiguration> m_pConfiguration;
+    std::function<void(std::string)> m_funcOpenWebsite;
 
     sol::state m_lua;
 
 public:
 
-    LuaScriptContextImpl(Engine* pEngine, ISoundEngine* pSoundEngine, std::string stringArtPath, const std::shared_ptr<UiScreenConfiguration>& pConfiguration) :
+    LuaScriptContextImpl(Engine* pEngine, ISoundEngine* pSoundEngine, std::string stringArtPath, const std::shared_ptr<UiScreenConfiguration>& pConfiguration, std::function<void(std::string)> funcOpenWebsite) :
         m_pEngine(pEngine),
         m_pSoundEngine(pSoundEngine),
         m_pConfiguration(pConfiguration),
@@ -202,7 +187,8 @@ public:
         m_pathFinder(PathFinder({
             stringArtPath + "/PBUI",
             stringArtPath
-        }))
+        })),
+        m_funcOpenWebsite(funcOpenWebsite)
     {
         m_loader.InitNamespaces(*this);
     }
@@ -231,6 +217,10 @@ public:
         return m_pSoundEngine;
     }
 
+    std::function<void(std::string)> GetOpenWebsiteFunction() {
+        return m_funcOpenWebsite;
+    }
+
     IEventSink& GetExternalEventSink(std::string name) {
         return m_pConfiguration->GetEventSink(name);
     }
@@ -242,15 +232,17 @@ class UiEngineImpl : public UiEngine {
 private:
     TRef<Engine> m_pEngine;
     TRef<ISoundEngine> m_pSoundEngine;
+    std::function<void(std::string)> m_funcOpenWebsite;
 
     TRef<EventSourceImpl> m_pReloadEventSource;
 
 
 public:
-    UiEngineImpl(Engine* pEngine, ISoundEngine* pSoundEngine) :
+    UiEngineImpl(Engine* pEngine, ISoundEngine* pSoundEngine, std::function<void(std::string)> funcOpenWebsite) :
         m_pEngine(pEngine),
         m_pSoundEngine(pSoundEngine),
-        m_pReloadEventSource(new EventSourceImpl())
+        m_pReloadEventSource(new EventSourceImpl()),
+        m_funcOpenWebsite(funcOpenWebsite)
     {
     }
 
@@ -265,7 +257,7 @@ public:
     //}
 
     TRef<Image> InnerLoadImageFromLua(const std::shared_ptr<UiScreenConfiguration>& screenConfiguration) {
-        std::unique_ptr<LuaScriptContextImpl> pContext = std::make_unique<LuaScriptContextImpl>(m_pEngine, m_pSoundEngine, m_stringArtPath, screenConfiguration);
+        std::unique_ptr<LuaScriptContextImpl> pContext = std::make_unique<LuaScriptContextImpl>(m_pEngine, m_pSoundEngine, m_stringArtPath, screenConfiguration, m_funcOpenWebsite);
 
         Executor executor = Executor();
 
@@ -332,7 +324,7 @@ public:
     }
 };
 
-UiEngine* UiEngine::Create(Engine* pEngine, ISoundEngine*  pSoundEngine)
+UiEngine* UiEngine::Create(Engine* pEngine, ISoundEngine* pSoundEngine, std::function<void(std::string)> funcOpenWebsite)
 {
-    return new UiEngineImpl(pEngine, pSoundEngine);
+    return new UiEngineImpl(pEngine, pSoundEngine, funcOpenWebsite);
 }

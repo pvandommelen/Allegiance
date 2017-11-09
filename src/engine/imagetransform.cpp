@@ -39,6 +39,41 @@ public:
     }
 };
 
+class CutImage : public WrapImage {
+public:
+    CutImage(Image* pimage, RectValue* prect) :
+        WrapImage(pimage, prect)
+    {
+    }
+
+    RectValue* GetRect() { return RectValue::Cast(GetChild(1)); }
+
+    void CalcBounds()
+    {
+        m_bounds = Rect(Point(0, 0), GetRect()->GetValue().Size());
+    }
+
+    MouseResult HitTest(IInputProvider* pprovider, const Point& point, bool bCaptured)
+    {
+        Rect rect = GetRect()->GetValue();
+        if (Rect(Point(0, 0), m_bounds.GetRect().Size()).Inside(point)) {
+            return MouseResultHit();
+        }
+
+        return MouseResult();
+    }
+
+    void Render(Context* pcontext)
+    {
+        pcontext->Clip(Rect(Point(0, 0), GetRect()->GetValue().Size()));
+        pcontext->Translate(-GetRect()->GetValue().Min());
+        WrapImage::Render(pcontext);
+    }
+
+    ZString GetFunctionName() { return "ClipImage"; }
+
+};
+
 TRef<Image> ImageTransform::Translate(Image* pImage, PointValue* pPoint) {
     return new TransformImage(
         pImage,
@@ -190,4 +225,8 @@ TRef<Image> ImageTransform::Switch(TStaticValue<ZString>* pValue, std::map<std::
 
 TRef<Image> ImageTransform::Clip(Image* pImage, RectValue* pRect) {
     return CreateClipImage(pImage, pRect);
+};
+
+TRef<Image> ImageTransform::Cut(Image* pImage, RectValue* pRect) {
+    return new CutImage(pImage, pRect);
 };

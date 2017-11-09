@@ -180,6 +180,9 @@ public:
         table["Clip"] = [](Image* pimage, RectValue* rect) {
             return ImageTransform::Clip(pimage, rect);
         };
+        table["Cut"] = [](Image* pimage, RectValue* rect) {
+            return ImageTransform::Cut(pimage, rect);
+        };
 
         context.GetLua().set("Image", table);
     }

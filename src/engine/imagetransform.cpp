@@ -36,6 +36,7 @@ public:
         TRef<Image> evaluated = m_callback(value1);
 
         SetImage(evaluated);
+        WrapImage::Evaluate();
     }
 };
 

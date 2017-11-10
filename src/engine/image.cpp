@@ -696,6 +696,7 @@ void WrapImage::SetImage(Image* pvalue)
 
 void WrapImage::CalcBounds()
 {
+    GetImage()->CalcBounds();
     m_bounds = GetImage()->GetBounds();
 }
 

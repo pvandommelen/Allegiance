@@ -79,6 +79,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='FZRetail|Win32'">
@@ -145,6 +146,7 @@
     <ClCompile Include="..\src\training\Goal.cpp" />
     <ClCompile Include="..\src\training\goallist.cpp" />
     <ClCompile Include="..\src\training\messageaction.cpp" />
+    <ClCompile Include="..\src\training\mission10.cpp" />
     <ClCompile Include="..\src\training\mission2.cpp" />
     <ClCompile Include="..\src\training\mission3.cpp" />
     <ClCompile Include="..\src\training\mission4.cpp" />
@@ -238,6 +240,7 @@
     <ClInclude Include="..\src\training\Goal.h" />
     <ClInclude Include="..\src\training\goallist.h" />
     <ClInclude Include="..\src\training\messageaction.h" />
+    <ClInclude Include="..\src\training\mission10.h" />
     <ClInclude Include="..\src\training\Mission2.h" />
     <ClInclude Include="..\src\training\Mission3.h" />
     <ClInclude Include="..\src\training\Mission4.h" />

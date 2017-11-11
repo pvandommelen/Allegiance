@@ -4945,7 +4945,7 @@ HRESULT FedSrvSiteBase::OnAppMessage(FedMessaging * pthis, CFMConnection & cnxnF
 		ZString senderName = pfsPlayer->GetName();
 		sourceSteamID = strtoull(pfsPlayer->GetCDKey(), NULL, NULL);
 		
-		char szRemote[16];
+		char szRemote[64];
 		CFMConnection * connection = pfsPlayer->GetConnection();
 		pthis->GetIPAddress(*connection, szRemote);
 		debugf("chat from connection ID: %x IP: %s\n", connection->GetID(), szRemote);
@@ -6697,7 +6697,7 @@ HRESULT FedSrvSiteBase::OnAppMessage(FedMessaging * pthis, CFMConnection & cnxnF
         break;
 	  
 	  // BT - STEAM - Enable moderators to ban players by context menu.
-	  if (isModerator == true)
+	  if (isModerator == true && pfspAck->IsPlayer())
 	  {
 		  char szMessageParam[1024];
 		  if (FM_VAR_REF(pfmQuitMission, szMessageParam))
@@ -6765,7 +6765,7 @@ HRESULT FedSrvSiteBase::OnAppMessage(FedMessaging * pthis, CFMConnection & cnxnF
 
 	  CFSPlayer * pfspAck = pfssAck->GetPlayer();
 
-	  if (isModerator == true)
+	  if (isModerator == true && pfssAck->IsPlayer())
 	  {
 		  char szMessageParam[1024];
 		  if (FM_VAR_REF(pfmQuitSide, szMessageParam))
@@ -10885,10 +10885,36 @@ class ThingSiteImpl : public ThingSite
                                             pfmObjectSpotted->oidObject = pmodel->GetObjectID();
                                             pfmObjectSpotted->otSpotter = otSpotter;
                                             pfmObjectSpotted->oidSpotter = s->GetObjectID();
-
+																						
                                             g.fm.SendMessages(CFSSide::FromIGC(pside)->GetGroup(), FM_GUARANTEED, FM_FLUSH); 
 
 											CFSMission* pfsMission = (CFSMission *)(pside->GetMission()->GetPrivateData());																		
+											
+											if (otModel == OT_station && pmodel != nullptr)
+											{
+												IstationIGC* pstation = ((IstationIGC*)pmodel);
+												const IstationTypeIGC *pStationType = pstation->GetStationType();
+
+												if (pStationType != nullptr && 
+													(
+														(pstation->GetStationType()->GetClassID() == c_scGarrison) ||
+														(pstation->GetStationType()->GetClassID() == c_scStarbase)
+													))
+												{
+													if (s != nullptr && s->GetMission() != nullptr && s->GetObjectType() == OT_ship)
+													{
+														ObjectID spotterID = s->GetObjectID();
+														ImodelIGC* pShipModel = s->GetMission()->GetModel(OT_ship, spotterID);
+
+														if (pShipModel != nullptr)
+														{
+															IshipIGC* pShip = (IshipIGC*)pShipModel;
+															pShip->SetAchievementMask(c_achmGarrSpot);
+														}
+													}													
+												}
+											}
+
 
                                             if ((otModel == OT_warp) || (otModel == OT_asteroid))
                                             {
@@ -12805,6 +12831,18 @@ bool FedSrvSiteBase::RescueShipEvent(IshipIGC* pshipRescued, IshipIGC* pshipResc
   {
       CFSShip* pfsShip = (CFSShip*)(pshipRescuer->GetPrivateData());
       pfsShip->GetPlayerScoreObject()->AddRescue();
+	  if (pfsShip->IsPlayer())
+	  {
+		  CSteamAchievements *pSteamAchievements = pfsShip->GetPlayer()->GetSteamAchievements();
+		  pSteamAchievements->AwardPodPickup();
+	  }
+
+	  CFSShip* rescuedShip = (CFSShip*)(pshipRescued->GetPrivateData());
+	  if (rescuedShip->IsPlayer())
+	  {
+		  CSteamAchievements *pSteamAchievements = pfsShip->GetPlayer()->GetSteamAchievements();
+		  pSteamAchievements->AwardGetRescued();
+	  }
       BEGIN_PFM_CREATE(g.fm, pfmPlayerRescued, S, PLAYER_RESCUED)
       END_PFM_CREATE
       pfmPlayerRescued->shipIDRescuer = pshipRescuer->GetObjectID();

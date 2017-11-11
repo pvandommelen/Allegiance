@@ -20,6 +20,10 @@
 class QuickChatNode : public IMDLObject {};
 
 #include "quickchat.h"
+#include <EngineSettings.h>
+#include <paneimage.h>
+#include <D3DDevice9.h>
+#include <DX9PackFile.h>
 
 // Tell the linker that my DLL should be delay loaded
 //#pragma comment(linker, "/DelayLoad:icqmapi.dll")
@@ -2470,7 +2474,7 @@ public:
                 {
                     extern  TRef<ModifiableNumber>  g_pnumberMissionNumber;
                     int     iMission = static_cast<int> (g_pnumberMissionNumber->GetValue ());
-                    ZAssert ((iMission >= 1) && (iMission <= 8)); //TheBored 06-JUL-07: second condition must be (iMission <= (number of training missions))
+                    ZAssert ((iMission >= 1) && (iMission <= 10)); //TheBored 06-JUL-07: second condition must be (iMission <= (number of training missions))
                     char*   strNamespace[] =
                     {
                         "",
@@ -2480,8 +2484,10 @@ public:
                         "tm_4_enemy_engagement_post",
                         "tm_5_command_view_post",
                         "tm_6_practice_arena_post",
-						"", //TheBored 06-JUL-07: Mish #7, blank because its never used
-						"tm_8_nanite_post", //TheBored 06-JUL-07: Mish #8 postgame panels
+                        "", //TheBored 06-JUL-07: Mish #7, blank because its never used
+                        "tm_8_nanite_post", //TheBored 06-JUL-07: Mish #8 postgame panels
+                        "",
+                        "tm_6_practice_arena_post" //05-NOV-17: FreeFlight pseudo training mission - use same post slides as tm6 (showing station instead of text in ui-stretch beta)
                     };
 					SetUiScreen(CreatePostTrainingSlideshow (GetModeler (), strNamespace[iMission]));
                     break;
@@ -4407,7 +4413,7 @@ public:
         if(bEnableMute)			m_pmenu->AddMenuItem(idmContextMutePlayer  , str4 , playerInfo->GetMute() == false ?'M' :'U');		
 
 		// BT - STEAM - Enable moderators to ban players by context menu.
-		if (IsPlayerSteamModerator())
+		if (IsPlayerSteamModerator() && playerInfo->IsHuman())
 		{
 			m_pmenu->AddMenuItem(idmContextKickPlayer, "Kick To NOAT", 'K');
 			m_pmenu->AddMenuItem(idmContextBanPlayer, "Ban From Game", 'B');
@@ -4505,7 +4511,7 @@ public:
 			if(bEnableReject)		m_pmenu->AddMenuItem(idmContextRejectPlayer , str4 , 'R');
 
 			// BT - STEAM - Enable moderators to ban players by context menu.
-			if (bSteamModerator == true && bEnableDock == false)
+			if (bSteamModerator == true && bEnableDock == false && playerInfo->IsHuman())
 			{
 				m_pmenu->AddMenuItem(idmContextKickPlayer, "Kick To NOAT", 'K');
 				m_pmenu->AddMenuItem(idmContextBanPlayer, "Ban From Game", 'B');

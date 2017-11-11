@@ -7576,7 +7576,7 @@ public:
 
         int nNumPlayingSoundBuffers;
         ZSucceeded(m_pSoundEngine->GetNumPlayingVirtualBuffers(nNumPlayingSoundBuffers));
-        char szRemoteAddress [64];
+        char szRemoteAddress [16];
         if (trekClient.m_fm.IsConnected())
           trekClient.m_fm.GetIPAddress(*trekClient.m_fm.GetServerConnection(), szRemoteAddress);
         else

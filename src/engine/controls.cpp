@@ -1,4 +1,9 @@
-#include "pch.h"
+#include "controls.h"
+
+#include <event.h>
+
+#include "button.h"
+#include "font.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1228,7 +1233,7 @@ public:
 	    }
 
         if (pos > m_size - m_sizePage) {
-		    pos = std::max(m_size - m_sizePage, 0);
+            pos = std::max(m_size - m_sizePage, 0);
 	    }
 
         if (m_pos != pos) {

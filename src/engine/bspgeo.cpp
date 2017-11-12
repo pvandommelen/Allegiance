@@ -1,4 +1,11 @@
-#include "pch.h"
+#include "bspgeo.h"
+
+#include <matrix.h>
+#include <tref.h>
+#include <vertex.h>
+
+#include "context.h"
+#include "model.h"
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -15,7 +22,7 @@ class BSPGeo : public Geo {
 
     class Node : public IObject {
     public:
-        virtual void Render(MeshIndex*& pindex, HVector& vec) = 0;
+        virtual void Render(MeshIndex*& pindex, const HVector& vec) = 0;
     };
 
     //////////////////////////////////////////////////////////////////////////////

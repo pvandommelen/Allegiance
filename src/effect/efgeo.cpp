@@ -1,4 +1,10 @@
-#include "pch.h"
+#include "efgeo.h"
+
+#include <engine.h>
+#include <geometry.h>
+#include <surface.h>
+
+#include "efart.h"
 
 //////////////////////////////////////////////////////////////////////////////
 //

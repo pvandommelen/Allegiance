@@ -415,7 +415,7 @@ void CFSMission::AddPlayerToMission(CFSPlayer * pfsPlayer)
     assert(GetCookie()); // we can't be sending messages w/ cookies unless we have a real cookie
 
 	 // BT - 9/11/2010 ACSS - Supports authentication check of the CD Key.
-	char szAddress[16];
+	char szAddress[64];
 	g.fm.GetIPAddress(*pfsPlayer->GetConnection(), szAddress);
 
     BEGIN_PFM_CREATE(g.fmLobby, pfmPlayerJoined, S, PLAYER_JOINED)
@@ -3878,7 +3878,7 @@ void CFSMission::QueueLobbyMissionInfo()
   }
 #endif
 
-  char szAddr[16]= "XXX-YYY-ZZZ-TTT"; // KGJV #114 IMAGO REVIEW IPv6!!!!
+  char szAddr[64]= "XXX-YYY-ZZZ-TTT"; // KGJV #114 IMAGO REVIEW IPv6!!!!
   ZVersionInfo vi; ZString zInfo = (LPCSTR)vi.GetFileVersionString(); //Imago 7/10 #62
   // KGJV: added sending m_misdef.misparms.szIGCStaticFile to lobby
   BEGIN_PFM_CREATE(g.fmLobby, pfmLobbyMissionInfo, LS, LOBBYMISSIONINFO)
@@ -3887,7 +3887,7 @@ void CFSMission::QueueLobbyMissionInfo()
     FM_VAR_PARM((PCC)m_strDetailsFiles, CB_ZTS)
 	FM_VAR_PARM(m_misdef.misparms.szIGCStaticFile,CB_ZTS)
 	FM_VAR_PARM((PCC)(g.strLocalAddress),CB_ZTS) // KGJV #114 - ServerName
-	FM_VAR_PARM(szAddr,16)                       // KGJV #114 - ServerAddr - placeholder here, lobby will fill it /Revisit, this can be Oct'ed and sent non variable
+	FM_VAR_PARM(szAddr,64)                       // KGJV #114 - ServerAddr - placeholder here, lobby will fill it /Revisit, this can be Oct'ed and sent non variable
 	FM_VAR_PARM(PCC(UTL::GetPrivilegedUsers(-1)),CB_ZTS) //Imago 6/10
 	FM_VAR_PARM(PCC(zInfo),CB_ZTS) //Imago 7/10
   END_PFM_CREATE

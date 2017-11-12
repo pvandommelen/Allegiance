@@ -16,6 +16,8 @@
 #ifndef __DISPENSERIGC_H_
 #define __DISPENSERIGC_H_
 
+#include "igc.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CdispenserIGC
 class CdispenserIGC : public IdispenserIGC

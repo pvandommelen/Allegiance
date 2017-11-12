@@ -1,5 +1,24 @@
-#include "pch.h"
+#include "model.h"
 
+#include <base.h>
+#include <quaternion.h>
+#include <tmap.h>
+#include "steam_api.h"
+#include <AllegianceSecurity.h>
+
+#include "controls.h"
+#include "D3DDevice9.h"
+#include "enginep.h"
+#include "geometry.h"
+#include "frameimage.h"
+#include "image.h"
+#include "imagetransform.h"
+#include "keyframe.h"
+#include "material.h"
+#include "paneimage.h"
+#include "value.h"
+#include "valuetransform.h"
+#include "DX9PackFile.h"
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -595,7 +614,7 @@ public:
 	}
     DWORD Read(void* p, DWORD length)
 	{
-		_ASSERT( length <= m_dwFileSize );
+        ZAssert( length <= m_dwFileSize );
 		memcpy( p, GetPointer(), length );
 		return length;
 	}
@@ -628,7 +647,7 @@ public:
 												pFile->GetLength(),
 												&fileInfo ) == D3D_OK )
 		{
-			_ASSERT( fileInfo.ResourceType == D3DRTYPE_TEXTURE );
+            ZAssert( fileInfo.ResourceType == D3DRTYPE_TEXTURE );
 			
 			// We can resize non-UI textures.
 			WinPoint targetSize( fileInfo.Width, fileInfo.Height );
@@ -637,7 +656,7 @@ public:
 			if( m_pmodeler->GetUIImageUsageHint() == false )
 			{
 				DWORD dwMaxTextureSize = CD3DDevice9::Get()->GetMaxTextureSize();
-				_ASSERT( dwMaxTextureSize >= 256 );
+                ZAssert( dwMaxTextureSize >= 256 );
 				while(	( targetSize.x > (LONG)dwMaxTextureSize ) ||
 						( targetSize.y > (LONG)dwMaxTextureSize ) )
 				{
@@ -658,7 +677,7 @@ public:
 		}
 		else
 		{
-			_ASSERT( false && "Failed to load image." );
+            ZAssert( false && "Failed to load image." );
 		}
 
 		// Replace FreeImage stuff with D3DX calls.
@@ -904,7 +923,7 @@ public:
 	private:
 		TRef<Engine> m_pengine;
 	public:
-		FillImage::FillImage(TRef<Engine> pengine, TRef<PointValue> psize, TRef<ColorValue> pcolor)
+        FillImage(TRef<Engine> pengine, TRef<PointValue> psize, TRef<ColorValue> pcolor)
 			: WrapImage(Image::GetEmpty(), psize, pcolor),
 			m_pengine(pengine)
 		{
@@ -914,7 +933,7 @@ public:
 		PointValue* GetSize() { return PointValue::Cast(GetChild(1)); }
 		ColorValue* GetColor() { return ColorValue::Cast(GetChild(2)); }
 
-		void FillImage::Evaluate()
+        void Evaluate()
 		{
 			PointValue* psize = GetSize();
 			ColorValue* pcolor = GetColor();
@@ -1433,7 +1452,7 @@ protected:
     TRef<ValueType> m_pdefault;
     float           m_number;
 
-    TStaticValue<StaticType>* GetWrappedValue() { return TStaticValue<StaticType>::Cast(GetChild(0)); }
+    TStaticValue<StaticType>* GetWrappedValue() { return TStaticValue<StaticType>::Cast(Value::GetChild(0)); }
 
 public:
     //////////////////////////////////////////////////////////////////////////////
@@ -1449,7 +1468,7 @@ public:
     {
     }
 
-    Number* GetNumber() { return Number::Cast(GetChild(1)); }
+    Number* GetNumber() { return Number::Cast(Value::GetChild(1)); }
 
     //////////////////////////////////////////////////////////////////////////////
     //
@@ -1465,7 +1484,7 @@ public:
 
         if (m_number == number) {
             pvalue->Update();
-            SetChild(0, pvalue);
+            TStaticValue<StaticType>::SetChild(0, pvalue);
         }
     }
 
@@ -1481,19 +1500,19 @@ public:
 
         if (m_number != number) {
             m_number = number;
-            DataList::Iterator iter(m_list);
+            typename DataList::Iterator iter(m_list);
 
             while (true) {
                 if (iter.End()) {
                     m_pdefault->Update();
-                    SetChild(0, m_pdefault);
+                    Value::SetChild(0, m_pdefault);
                     break;
                 }
                 const Data& data = iter.Value();
 
                 if (data.m_number == number) {
                     data.m_pvalue->Update();
-                    SetChild(0, data.m_pvalue);
+                    Value::SetChild(0, data.m_pvalue);
                     break;
                 }
 
@@ -1501,7 +1520,7 @@ public:
             }
         }
 
-        GetValueInternal() = GetWrappedValue()->GetValue();
+        TStaticValue<StaticType>::GetValueInternal() = GetWrappedValue()->GetValue();
     }
 };
 

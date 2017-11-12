@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "pch.h"
 #include "ui.h"
 #include "items.hpp"
+#include "D3DDevice9.h"
 
 TRef<Image> LoadImageFile(LuaScriptContext& context, std::string path) {
     std::string fullpath = context.FindPath(path);

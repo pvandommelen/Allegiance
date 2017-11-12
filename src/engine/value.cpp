@@ -1,4 +1,9 @@
-#include "pch.h"
+#include "value.h"
+
+#include <base.h>
+#include <matrix.h>
+
+#include "LogFile.h"
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -340,7 +345,7 @@ ZString Value::GetChildString(int indent)
 
 ZString Value::Indent(int indent)
 {
-    static char* pchSpaces = "                                                                ";
+    static const char* pchSpaces = "                                                                ";
 
     ZAssert(indent * 2 < 64);
 

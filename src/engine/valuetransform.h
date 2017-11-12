@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "value.h"
 #include <functional>
 
 class NumberTransform {

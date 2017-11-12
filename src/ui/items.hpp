@@ -1,8 +1,11 @@
 
 #pragma once
 
-#include "pch.h"
 #include "ui.h"
+#include "enginep.h"
+#include "font.h"
+#include "valuetransform.h"
+#include "imagetransform.h"
 
 class PathFinder {
 

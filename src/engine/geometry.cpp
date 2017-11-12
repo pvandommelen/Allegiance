@@ -1,4 +1,11 @@
-#include "pch.h"
+#include "geometry.h"
+
+
+#include <alloc.h>
+#include <base.h>
+#include <tmap.h>
+
+#include "surface.h"
 
 //////////////////////////////////////////////////////////////////////////////
 //

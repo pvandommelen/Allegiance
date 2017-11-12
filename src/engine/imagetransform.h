@@ -1,6 +1,9 @@
 
 #pragma once
 
+#include "model.h"
+#include "enginep.h"
+
 class ImageTransform {
 public:
     static TRef<Image> Translate(Image* pImage, PointValue* pPoint);

@@ -2,6 +2,7 @@
 
 #include "soundengine.h"
 #include "model.h"
+#include "image.h"
 #include "engine.h"
 
 #define SOL_CHECK_ARGUMENTS 1

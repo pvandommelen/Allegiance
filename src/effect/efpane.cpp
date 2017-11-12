@@ -1,4 +1,12 @@
-#include "pch.h"
+#include "efpane.h"
+
+#include <button.h>
+#include <controls.h>
+#include <event.h>
+#include <namespace.h>
+#include <tref.h>
+
+#include "listpane.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -494,12 +502,14 @@ public:
         temp.SetX((int)ppoint->GetValue().X());
         temp.SetY((int)ppoint->GetValue().Y());
 
+        TRef<IIntegerEventSource> evtmp;
+        TRef<ScrollPane> sptmp;
         return
             CreateTrekScrollPane(
                 temp,
                 m_pmodeler,
-                TRef<IIntegerEventSource>(),
-                TRef<ScrollPane>(),
+                evtmp,
+                sptmp,
                 m_bHorizontal,
                 pbuttonUp,
                 pbuttonDown,

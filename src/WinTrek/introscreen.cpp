@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "regkey.h"
 #include "training.h"
+#include "valuetransform.h"
 
 extern bool CheckNetworkDevices(ZString& strDriverURL);
 

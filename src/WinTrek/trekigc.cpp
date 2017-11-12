@@ -17,6 +17,7 @@
 #include "regkey.h"
 #include <zreg.h>
 #include "badwords.h"
+#include "valuetransform.h"
 
 class ClusterSiteImpl : public ClusterSite
 {
@@ -2106,7 +2107,7 @@ class ThingSiteImpl : public ThingSitePrivate
 
             if (Training::IsTraining ())
             {
-                if ((trekClient.GetShip ()->GetSide () != side) && (Training::GetTrainingMissionID () != Training::c_TM_6_Practice_Arena))
+                if ((trekClient.GetShip()->GetSide() != side) && (Training::GetTrainingMissionID() != Training::c_TM_6_Practice_Arena) && (Training::GetTrainingMissionID() != Training::c_TM_10_Free_Flight))
                     return false;
             }
             return m_sideVisibility.fVisible();
@@ -3623,7 +3624,7 @@ HRESULT WinTrekClient::OnAppMessage(FedMessaging * pthis, CFMConnection & cnxnFr
 		if (pfm->fmid == FM_S_MISSIONDEF)
 		{
 			CASTPFM(pfmMissionDef, S, MISSIONDEF, pfm);
-			//char szAddr[16];
+			//char szAddr[64];
 			pthis->GetIPAddress(cnxnFrom, pfmMissionDef->szServerAddr); // get the real addr 
 			//Strncpy(pfmMissionDef->szServerAddr,szAddr,16);
 			//strcpy_s(pfmMissionDef->szServerAddr,16,szAddr); // IMAGO REVIEW CRASH 7/24/09
@@ -4235,7 +4236,7 @@ void      WinTrekClient::ReceiveChat(IshipIGC*   pshipSender,
     if (Training::IsTraining ())
     {
         // prevent players from giving commands to themselves
-        if (pshipSender && (oidRecipient == pshipSender->GetObjectID ()))
+        if (pshipSender && (oidRecipient == pshipSender->GetObjectID ()) && !Training::CommandViewEnabled())
             pmodelTarget = NULL;
 
         // send out the chat we are getting to see if we are waiting for it...

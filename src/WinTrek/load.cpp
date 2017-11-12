@@ -1,5 +1,12 @@
 #include "pch.h"
 
+#include <button.h>
+#include <controls.h>
+#include <geometry.h>
+#include <image.h>
+#include <paneimage.h>
+#include "valuetransform.h"
+
 const Money moneyLots = 0x7fffffff;
 
 //////////////////////////////////////////////////////////////////////////////

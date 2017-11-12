@@ -1,4 +1,9 @@
-#include "pch.h"
+#include "image.h"
+
+#include <base.h>
+
+#include "enginewindow.h"
+#include "namespace.h"
 
 //////////////////////////////////////////////////////////////////////////////
 //

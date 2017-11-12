@@ -1,5 +1,6 @@
 
-#include "pch.h"
+#include "imagetransform.h"
+#include "image.h"
 
 class ImageSize : public PointValue {
 private:

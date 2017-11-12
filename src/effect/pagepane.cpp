@@ -1,4 +1,9 @@
-#include "pch.h"
+#include "help.h"
+
+#include <base.h>
+#include <controls.h>
+#include <namespace.h>
+#include <token.h>
 
 //////////////////////////////////////////////////////////////////////////////
 //

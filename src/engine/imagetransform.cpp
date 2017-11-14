@@ -90,6 +90,13 @@ TRef<Image> ImageTransform::Scale(Image* pImage, PointValue* pPoint) {
     );
 };
 
+TRef<Image> ImageTransform::Rotate(Image* pImage, Number* pNumberRadians) {
+    return new TransformImage(
+        pImage,
+        new RotateTransform2(pNumberRadians)
+    );
+}
+
 TRef<PointValue> ImageTransform::Size(Image* pImage) {
     return new ImageSize(pImage);
 };

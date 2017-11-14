@@ -151,6 +151,9 @@ public:
         table["Scale"] = [](Image* pimage, PointValue* pPoint) {
             return ImageTransform::Scale(pimage, pPoint);
         };
+        table["Rotate"] = [](Image* pimage, sol::object radians) {
+            return ImageTransform::Rotate(pimage, wrapValue<float>(radians));
+        };
         table["Size"] = [](Image* pimage) {
             return ImageTransform::Size(pimage);
         };

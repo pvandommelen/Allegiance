@@ -8,6 +8,7 @@ class ImageTransform {
 public:
     static TRef<Image> Translate(Image* pImage, PointValue* pPoint);
     static TRef<Image> Scale(Image* pImage, PointValue* pPoint);
+    static TRef<Image> Rotate(Image* pImage, Number* pNumberRadians);
 
     static TRef<PointValue> Size(Image* pImage);
 

@@ -27,6 +27,13 @@ public:
                 )
             );
         };
+
+        table["Height"] = [](FontValue* font) {
+            return (TRef<Number>)new TransformedValue<float, TRef<IEngineFont>>([](IEngineFont* font) {
+                return (float)font->GetHeight();
+            }, font);
+        };
+
         m_pLua->set("Font", table);
     }
 };

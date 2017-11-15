@@ -22,4 +22,6 @@ public:
 
     static TRef<Image> Clip(Image* pImage, RectValue* pRect);
     static TRef<Image> Cut(Image* pImage, RectValue* pRect);
+
+    static TRef<Image> Multiply(Image* pImage, ColorValue* pColor);
 };

@@ -5,7 +5,7 @@
 #include "items.hpp"
 #include "D3DDevice9.h"
 
-TRef<Image> LoadImageFile(LuaScriptContext& context, std::string path) {
+TRef<ConstantImage> LoadImageFile(LuaScriptContext& context, std::string path) {
     std::string fullpath = context.FindPath(path);
     Engine* pEngine = context.GetEngine();
 
@@ -48,12 +48,11 @@ TRef<Image> LoadImageFile(LuaScriptContext& context, std::string path) {
                 Color(0, 0, 0),
                 pathString);
 
-        return (TRef<Image>)new ConstantImage(psurface, pathString);
+        return new ConstantImage(psurface, pathString);
     }
     else
     {
-        _ASSERT(false && "Failed to load image.");
-        return Image::GetEmpty();
+        throw std::exception("Failed to load image: " + pathString);
     }
 }
 
@@ -83,7 +82,7 @@ public:
             return (TRef<Image>)new MouseEventImage(image);
         };
         table["LoadFile"] = [&context](std::string path) {
-            return LoadImageFile(context, path);
+            return (TRef<ConstantImage>)LoadImageFile(context, path);
         };
         table["Group"] = [](sol::table list) {
             TRef<GroupImage> pgroup = new GroupImage();
@@ -187,6 +186,13 @@ public:
             return ImageTransform::Cut(pimage, rect);
         };
 
+        table["Multiply"] = [](ConstantImage* pimage, ColorValue* color) {
+            return ImageTransform::Multiply(pimage, color);
+        };
+
+        context.GetLua().new_usertype<ConstantImage>("ConstantImage",
+            sol::base_classes, sol::bases<Image>()
+        );
         context.GetLua().set("Image", table);
     }
 };

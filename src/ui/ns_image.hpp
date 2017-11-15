@@ -110,14 +110,7 @@ public:
                     mapOptions[strKey] = value.as<Image*>();
                 });
 
-                if (value.is<std::string>()) {
-                    return ImageTransform::Switch(
-                        (TRef<TStaticValue<ZString>>)new TStaticValue<ZString>(ZString(value.as<std::string>().c_str())),
-                        mapOptions
-                    );
-                }
-
-                return ImageTransform::Switch(wrapValue<ZString>(value), mapOptions);
+                return ImageTransform::Switch(wrapString(value), mapOptions);
             }
             else if (value.is<Number>() || value.is<float>()) {
                 std::map<int, TRef<Image>> mapOptions;
@@ -141,8 +134,8 @@ public:
             }
             throw std::runtime_error("Expected value argument of Image.Switch to be either a wrapped or unwrapped bool, int, or string");
         };
-        table["String"] = [](FontValue* font, ColorValue* color, int width, std::string string) {
-            return CreateStringImage(JustifyLeft(), font->GetValue(), color, width, new StringValue(ZString(string.c_str())));
+        table["String"] = [](FontValue* font, ColorValue* color, sol::object width, sol::object string) {
+            return CreateStringImage(JustifyLeft(), font->GetValue(), color, wrapValue<float>(width), wrapString(string));
         };
         table["Translate"] = [](Image* pimage, PointValue* pPoint) {
             return ImageTransform::Translate(pimage, pPoint);

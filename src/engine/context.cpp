@@ -702,6 +702,13 @@ public:
 				pDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 				pDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 				break;
+            case BlendModeSourceAlphaPreMultiplied:
+                pDev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+                pDev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+                pDev->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
+                pDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+                pDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+                break;
 			default:
 				ZError("Invalid blend mode");
 		}
@@ -988,6 +995,13 @@ public:
 			pDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 			pDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 			break;
+        case BlendModeSourceAlphaPreMultiplied:
+            pDev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+            pDev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+            pDev->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
+            pDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+            pDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+            break;
 		default:
 			ZError("Invalid blend mode");
 		}
